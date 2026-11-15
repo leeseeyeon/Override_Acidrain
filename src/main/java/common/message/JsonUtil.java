@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
 import common.message.lobby.*;
+import common.message.lobby.*;
 
 public class JsonUtil {
     private static final Gson GSON = new Gson();   // 하나만 만들어서 공유 (thread-safe)
@@ -14,9 +15,23 @@ public class JsonUtil {
     // type 이름 → 메시지 클래스 대응표 (메시지 추가 시 한 줄씩)
     private static final Map<String, Class<? extends Message>> TYPES = new HashMap<>();
     static {
-        //TYPES.put(MessageType.CHAT,   ChatMessage.class);
-        //TYPES.put(MessageType.JOINED, JoinedMessage.class);
-        //TYPES.put(MessageType.READY,  ReadyMessage.class);
+    	// 대기실 공통
+        TYPES.put(MessageType.CHAT,          ChatMessage.class);
+        TYPES.put(MessageType.READY,         ReadyMessage.class);
+        TYPES.put(MessageType.THEME,         ThemeMessage.class);
+        TYPES.put(MessageType.ERROR,         ErrorMessage.class);
+        TYPES.put(MessageType.START,         SignalMessage.class);
+        TYPES.put(MessageType.OPPONENT_LEFT, SignalMessage.class);
+
+        // 대기실 클라 → 서버
+        TYPES.put(MessageType.JOIN,          JoinMessage.class);
+
+        // 대기실 서버 → 클라
+        TYPES.put(MessageType.JOINED,        JoinedMessage.class);
+        TYPES.put(MessageType.OPPONENT,      OpponentMessage.class);
+        TYPES.put(MessageType.ROLE,          RoleMessage.class);
+
+        // GAME_START: 게임 프로토콜 정해지면 추가
     }
 
     private JsonUtil() {}
