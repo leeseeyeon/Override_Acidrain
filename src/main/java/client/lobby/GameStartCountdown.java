@@ -24,6 +24,7 @@ public class GameStartCountdown {
         timer.start();
     }
 
+
     public void cancel() {
         if (timer != null) {
             timer.stop();
