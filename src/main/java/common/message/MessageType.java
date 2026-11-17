@@ -11,7 +11,7 @@ public class MessageType {
     // 대기실 서버 → 클라
     public static final String JOINED        = "JOINED";        // roomId, role
     public static final String OPPONENT      = "OPPONENT";      // nickname
-    public static final String GAME_START    = "GAME_START";    // (게임 데이터 추가 예정)
+    public static final String GAME_START    = "GAME_START";    // gameId, theme, player1, player2, myPlayerId
     public static final String OPPONENT_LEFT = "OPPONENT_LEFT"; // 필드 없음
     public static final String ROLE          = "ROLE";          // role
     public static final String ERROR         = "ERROR";         // error code
@@ -21,11 +21,14 @@ public class MessageType {
     
     
     // 게임 클라 → 서버
-    
-    
-    
+    public static final String ITEM_INPUT         = "ITEM_INPUT";         // itemId, text, typingTime
+    public static final String GAME_QUIT          = "GAME_QUIT";          // 필드 없음
+    public static final String WORD_SUBMIT        = "WORD_SUBMIT";        // 미정
     
     // 게임 서버 → 클라
+    public static final String GAME_FINISHED      = "GAME_FINISHED";      // result
+    public static final String GAME_STATE_UPDATE  = "GAME_STATE_UPDATE";  // 미정
+    // GAME_START는 대기실에서 쓴 것과 같음
 
     private MessageType() {}
 }

@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
 import common.message.lobby.*;
-import common.message.lobby.*;
+import common.message.game.*;
 
 public class JsonUtil {
     private static final Gson GSON = new Gson();   // 하나만 만들어서 공유 (thread-safe)
@@ -32,6 +32,16 @@ public class JsonUtil {
         TYPES.put(MessageType.ROLE,          RoleMessage.class);
 
         // GAME_START: 게임 프로토콜 정해지면 추가
+        
+        // 게임 클라 → 서버
+        //TYPES.put(MessageType.WORD_SUBMIT,          .class);
+        TYPES.put(MessageType.ITEM_INPUT,    ItemInputMessage.class);
+        TYPES.put(MessageType.GAME_QUIT,     SignalMessage.class);
+        
+        // 게임 서버 → 클라
+        TYPES.put(MessageType.GAME_START,    GameStartMessage.class);
+        //TYPES.put(MessageType.GAME_STATE_UPDATE,      .class);
+        TYPES.put(MessageType.GAME_FINISHED, GameFinishedMessage.class);
     }
 
     private JsonUtil() {}
