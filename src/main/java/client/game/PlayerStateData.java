@@ -9,7 +9,7 @@ public class PlayerStateData {
 	private double accuracy;
 	
 	public PlayerStateData(int hp, double cpm, double accuracy) {
-		
+		// TODO : 나중에 매개 변수를 필드에 넣어주는 초기화 코드
 	}
 	public int getCurrentHp() {
 		return 0;

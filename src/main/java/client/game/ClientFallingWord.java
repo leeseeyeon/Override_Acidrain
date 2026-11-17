@@ -1,11 +1,10 @@
 package client.game;
 
-public class ClientFallingWord {
+abstract class ClientFallingWord {
 	private int wordId;
 	protected String text;
 	protected float x;
 	protected float y;
-	protected FallingWordType type;
 	
 	public ClientFallingWord(int id, String text, float x, float y) {
 		
