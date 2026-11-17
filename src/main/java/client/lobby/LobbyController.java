@@ -15,10 +15,10 @@ import common.message.lobby.*;
  * - 서버 메시지(update) → LobbyModel 갱신 → View는 Observer로 자동 갱신, 하단 버튼은 refreshActionButton()으로 직접 갱신
  * - 방장/참가자 차이는 myRole(LobbyRole)에게 맡김
  *
- * ℹ 진짜 상태는 서버가 가짐. 버튼을 눌러도 Model은 바로 바꾸지 않고 서버 응답(브로드캐스트)으로 바꿈
- * ℹ 이 객체는 connect() 전에 serverConnection.addListener(this)로 등록되어야 함
- * ⚠ 이 패키지의 ChatMessage(채팅창 한 줄)와 서버의 common.message.lobby.ChatMessage는 이름이 같아서
- *    서버 쪽은 전체 이름으로 씀
+ * 진짜 상태는 서버가 가짐. 버튼을 눌러도 Model은 바로 바꾸지 않고 서버 응답(브로드캐스트)으로 바꿈
+ * 이 객체는 connect() 전에 serverConnection.addListener(this)로 등록되어야 함
+ * 이 패키지의 ChatMessage(채팅창 한 줄)와 서버의 common.message.lobby.ChatMessage는 이름이 같아서
+ * 서버 쪽은 전체 이름으로 작성.
  */
 public class LobbyController implements MessageListener, CountdownListener {
     private final LobbyModel lobbyModel;
