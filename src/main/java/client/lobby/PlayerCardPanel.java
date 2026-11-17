@@ -6,10 +6,9 @@ import javax.swing.*;
 
 /*
 플레이어 카드 (View 부품) - Player1(방장) / Player2(참가자) 두 번 생성해서 사용
- 받은 값을 표시하기만 하고, 무엇을 표시할지는 LobbyView가 정함
  */
 public class PlayerCardPanel extends JPanel {
-    private static final String EMPTY_SLOT_TEXT = "대기 중…";
+    private static final String EMPTY_SLOT_TEXT = "입장 대기 중…";
 
     private JLabel slotTitleLabel;
     private JLabel nicknameLabel;
@@ -23,7 +22,7 @@ public class PlayerCardPanel extends JPanel {
 
         slotTitleLabel = new JLabel("Player");
         slotTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        slotTitleLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 22));
+        slotTitleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 22));
         slotTitleLabel.setBounds(10, 30, 200, 36);
         add(slotTitleLabel);
 
@@ -35,8 +34,8 @@ public class PlayerCardPanel extends JPanel {
 
         statusLabel = new JLabel(" ");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        statusLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
-        statusLabel.setBounds(45, 335, 130, 34);
+        statusLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 18));
+        statusLabel.setBounds(45, 291, 130, 78);
         add(statusLabel);
     }
 

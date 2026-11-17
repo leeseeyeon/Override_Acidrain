@@ -5,20 +5,20 @@ import common.message.*;
 import common.message.lobby.*;
 
 /**
- * 방장 역할: 참가자가 준비하면 "시작!" 버튼 활성화 → START 전송
- * 옵션(테마) 편집 가능
+ * 방장 역할: 참가자가 준비하면 "시작!" 버튼 활성화
+ *  START 전송, 옵션(테마) 편집 가능
  */
 public class HostRole implements LobbyRole {
 
     @Override
     public String getActionButtonText(LobbyModel model) {
         if (model.isCountingDown()) {
-            return "곧 시작합니다!";
+            return "게임을 시작합니다...";
         }
         if (model.getGuestNickname() == null) {
-            return "상대를 기다리는 중…";
+            return "상대를 기다리는 중...";
         }
-        return model.isGuestReady() ? "시작!" : "(" + model.getGuestNickname() + ") 준비 중…";
+        return model.isGuestReady() ? "게임 시작!" : "(" + model.getGuestNickname() + ") 준비 중…";
     }
 
     @Override
@@ -31,7 +31,7 @@ public class HostRole implements LobbyRole {
         if (!isActionButtonEnabled(model)) {
             return;
         }
-        conn.send(JsonUtil.encode(SignalMessage.start()));   // ❓ send()가 String을 받는지 확인
+        conn.send(SignalMessage.start());   // ServerConnection이 JSON으로 바꿔서 보냄
     }
 
     @Override

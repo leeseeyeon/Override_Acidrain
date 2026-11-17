@@ -163,7 +163,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     public void onCountdownFinished() {
         isInLobby = false;
         lobbyModel.setCountingDown(false);
-        screenNavigator.showGameScreen();   // ❓ 게임 화면에 넘길 데이터는 편채영님과 협의
+        screenNavigator.showGameScreen();   
     }
 
 
@@ -180,7 +180,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     }
 
     private void sendToServer(Message message) {
-        serverConnection.send(JsonUtil.encode(message));   //send()가 String을 받는지 Message를 받는지 확인
+        serverConnection.send(message);   // ServerConnection이 JSON으로 바꿔서 보냄
     }
 
     private Message decodeOrNull(String json) {
