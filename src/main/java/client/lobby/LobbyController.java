@@ -60,7 +60,7 @@ public class LobbyController implements MessageListener, CountdownListener {
         if (!myRole.canEditOptions() || theme == lobbyModel.getSelectedTheme()) {
             return;
         }
-        sendToServer(new ThemeMessage(theme));   // 화면 반영은 서버가 THEME를 돌려줄 때
+        sendToServer(new ThemeMessage(theme));   // 서버에게 선택한 테마 전달.
     }
 
     public void onChatEntered(String content) {
