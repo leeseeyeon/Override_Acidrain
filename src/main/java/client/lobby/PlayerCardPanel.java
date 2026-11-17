@@ -35,7 +35,7 @@ public class PlayerCardPanel extends JPanel {
         statusLabel = new JLabel(" ");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 18));
-        statusLabel.setBounds(45, 291, 130, 78);
+        statusLabel.setBounds(31, 289, 155, 78);
         add(statusLabel);
     }
 
