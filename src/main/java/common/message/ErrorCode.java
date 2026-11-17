@@ -5,5 +5,13 @@ public enum ErrorCode {
 	ROOM_FULL,
     ROOM_NOT_FOUND,
     NOT_HOST,
-    DUPLICATE_NICKNAME
+    DUPLICATE_NICKNAME,
+    
+    // 게임 중 에러코드
+    NOT_IN_GAME,
+    GAME_ALREADY_FINISHED,
+    INVALID_ITEM,
+    
+    // 공통 에러코드
+    INVALID_MESSAGE
 }
