@@ -18,7 +18,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
     private ChatPanel chatPanel;
     private JButton lobbyActionButton;
 
-    /** 채팅창에 이미 표시한 메시지 수 (새로 생긴 것만 추가하기 위해) */
+    /* 채팅창에 이미 표시한 메시지 수 (새로 생긴 것만 추가하기 위해) */
     private int shownChatMessageCount = 0;
 
     public LobbyView() {

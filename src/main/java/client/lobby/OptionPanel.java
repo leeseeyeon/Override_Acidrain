@@ -8,9 +8,9 @@ import javax.swing.*;
 import common.message.*;
 
 /*
- * 옵션선택 영역 (View 부품) - 단어 테마 선택
- * 테마마다 선택 카드(JToggleButton) 하나. 
- * 방장만 고를 수 있고, 참가자는 방장이 고른 테마를 보기만 함
+옵션선택 영역 (View 부품) - 단어 테마 선택
+테마마다 선택 카드(JToggleButton) 하나. 
+방장만 고를 수 있고, 참가자는 방장이 고른 테마를 보기만 함
  */
 public class OptionPanel extends JPanel {
     private static final Color SELECTED_CARD_COLOR = new Color(91, 91, 91);

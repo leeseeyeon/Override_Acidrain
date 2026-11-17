@@ -4,12 +4,8 @@ import java.util.*;
 
 import common.message.*;
 
-/**
- * 대기실 상태 (Model)
- *
- * ℹ 서버 GameRoom(host, guest, guestReady)과 같은 구조
- * ℹ Swing 클래스를 import하지 않음 → 화면 없이 JUnit으로 테스트 가능
- * ℹ 값을 바꾸는 메소드는 마지막에 notifyLobbyChanged()로 구독자(View)에게 알림
+/*
+대기실 상태 (Model)
  */
 public class LobbyModel {
     private String myNickname;
@@ -28,7 +24,7 @@ public class LobbyModel {
 
     // ===== 상태 변경 (서버 메시지 하나당 하나씩) =====
 
-    /** JOINED: 방에 처음 들어왔을 때 */
+    /* JOINED: 방에 처음 들어왔을 때 */
     public void enterRoom(String myNickname, boolean isHost) {
         this.myNickname = myNickname;
         this.isLocalPlayerHost = isHost;
@@ -41,7 +37,7 @@ public class LobbyModel {
         notifyLobbyChanged();
     }
 
-    /** OPPONENT: 상대 닉네임을 받았을 때 */
+    /* OPPONENT: 상대 닉네임을 받았을 때 */
     public void setOpponentNickname(String opponentNickname) {
         if (isLocalPlayerHost) {
             guestNickname = opponentNickname;
@@ -51,7 +47,7 @@ public class LobbyModel {
         notifyLobbyChanged();
     }
 
-    /** OPPONENT_LEFT: 상대가 나갔을 때 */
+    /* OPPONENT_LEFT: 상대가 나갔을 때 */
     public void clearOpponent() {
         if (isLocalPlayerHost) {
             guestNickname = null;
@@ -63,7 +59,7 @@ public class LobbyModel {
         notifyLobbyChanged();
     }
 
-    /** ROLE: 내 역할이 바뀌었을 때 (예: 방장이 나가서 내가 방장이 됨) */
+    /* ROLE: 내 역할이 바뀌었을 때 (예: 방장이 나가서 내가 방장이 됨) */
     public void changeLocalRole(boolean isHost) {
         if (isLocalPlayerHost == isHost) {
             return;
@@ -76,13 +72,13 @@ public class LobbyModel {
         notifyLobbyChanged();
     }
 
-    /** READY: 참가자 준비 상태 */
+    /* READY: 참가자 준비 상태 */
     public void updateGuestReady(boolean isReady) {
         this.isGuestReady = isReady;
         notifyLobbyChanged();
     }
 
-    /** THEME: 방장이 고른 테마 */
+    /* THEME: 방장이 고른 테마 */
     public void setSelectedTheme(Theme theme) {
         if (theme == null) {
             return;
@@ -91,13 +87,13 @@ public class LobbyModel {
         notifyLobbyChanged();
     }
 
-    /** GAME_START 후 카운트다운 중인지 */
+    /* GAME_START 후 카운트다운 중인지 */
     public void setCountingDown(boolean isCountingDown) {
         this.isCountingDown = isCountingDown;
         notifyLobbyChanged();
     }
 
-    /** CHAT, 시스템 안내 */
+    /* CHAT, 시스템 안내 */
     public void addChatMessage(ChatMessage message) {
         chatMessages.add(message);
         notifyLobbyChanged();

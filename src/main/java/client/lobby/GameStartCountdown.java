@@ -2,11 +2,9 @@ package client.lobby;
 
 import javax.swing.Timer;   // java.util.Timer와 이름이 같아서 직접 지정
 
-/**
- * 게임 시작 전 3, 2, 1 카운트다운
- *
- * ℹ GAME_START를 받은 각 클라이언트가 스스로 셈 (서버 수정 없음)
- * ℹ javax.swing.Timer는 Swing 쓰레드에서 실행되므로 invokeLater가 필요 없음
+/*
+게임 시작 전 3, 2, 1 카운트다운
+GAME_START를 받은 각 클라이언트가 스스로 셈 (서버 수정 없음)
  */
 public class GameStartCountdown {
     private static final int COUNTDOWN_SECONDS = 3;
@@ -26,7 +24,6 @@ public class GameStartCountdown {
         timer.start();
     }
 
-    /** 돌고 있지 않을 때 불러도 안전함 */
     public void cancel() {
         if (timer != null) {
             timer.stop();

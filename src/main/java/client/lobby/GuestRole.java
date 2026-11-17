@@ -4,10 +4,10 @@ import client.network.*;
 import common.message.*;
 import common.message.lobby.*;
 
-/**
- * 참가자 역할: "준비" 버튼 → READY 전송
- * 테마 편집 불가
- * 준비 후 "기다리는 중…"으로 버튼 잠김
+/*
+ 참가자 역할: "준비" 버튼 → READY 전송
+ 테마 편집 불가
+ 준비 후 "기다리는 중…"으로 버튼 잠김
  */
 public class GuestRole implements LobbyRole {
 

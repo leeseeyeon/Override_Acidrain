@@ -8,18 +8,11 @@ import client.ui.*;
 import common.message.*;
 import common.message.lobby.*;
 
-/**
- * 대기실 Controller
- *
- * - 사용자 입력(하단 버튼, 테마 선택, 채팅) → 서버로 메시지 전송
- * - 서버 메시지(update) → LobbyModel 갱신 → View는 Observer로 자동 갱신, 하단 버튼은 refreshActionButton()으로 직접 갱신
- * - 방장/참가자 차이는 myRole(LobbyRole)에게 맡김
- *
- * ℹ 진짜 상태는 서버가 가짐. 버튼을 눌러도 Model은 바로 바꾸지 않고 서버 응답(브로드캐스트)으로 바꿈
- * ℹ 이 객체는 connect() 전에 serverConnection.addListener(this)로 등록되어야 함
- * ⚠ 이 패키지의 ChatMessage(채팅창 한 줄)와 서버의 common.message.lobby.ChatMessage는 이름이 같아서
- *    서버 쪽은 전체 이름으로 씀
- */
+/*
+대기실 Controller
+방장/참가자 차이는 myRole(LobbyRole)에게 맡김
+*/
+
 public class LobbyController implements MessageListener, CountdownListener {
     private final LobbyModel lobbyModel;
     private final LobbyView lobbyView;
@@ -80,7 +73,7 @@ public class LobbyController implements MessageListener, CountdownListener {
 
     // ===== 서버 메시지 (MessageListener) =====
 
-    /** 수신 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
+    /* 수신 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
     @Override
     public void update(String json) {
         SwingUtilities.invokeLater(() -> handleServerMessage(json));
@@ -147,7 +140,6 @@ public class LobbyController implements MessageListener, CountdownListener {
         refreshActionButton();
     }
 
-    /** ❓ JsonUtil에 GAME_START가 아직 등록되지 않아 지금은 이 메시지를 받을 수 없음 (시연님께 요청) */
     private void handleGameStarted() {
         lobbyModel.setCountingDown(true);
         refreshActionButton();
@@ -175,14 +167,13 @@ public class LobbyController implements MessageListener, CountdownListener {
         screenNavigator.showGameScreen();   // ❓ 게임 화면에 넘길 데이터는 편채영님과 협의
     }
 
-    // ===== 내부 도우미 =====
 
     private void changeMyRole(Role role) {
         myRole = (role == Role.HOST) ? new HostRole() : new GuestRole();
         lobbyView.setOptionEditable(myRole.canEditOptions());
     }
 
-    /** Model 값이 버튼에 영향을 줄 때마다 직접 호출 (Model을 바꾸는 코드를 추가하면 여기 호출도 잊지 말 것) */
+    /* Model 값이 버튼에 영향을 줄 때마다 직접 호출 (Model을 바꾸는 코드를 추가하면 여기 호출도 잊지 말 것) */
     private void refreshActionButton() {
         lobbyView.updateActionButton(
                 myRole.getActionButtonText(lobbyModel),
@@ -190,7 +181,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     }
 
     private void sendToServer(Message message) {
-        serverConnection.send(JsonUtil.encode(message));   // ❓ send()가 String을 받는지 Message를 받는지 확인
+        serverConnection.send(JsonUtil.encode(message));   //send()가 String을 받는지 Message를 받는지 확인
     }
 
     private Message decodeOrNull(String json) {

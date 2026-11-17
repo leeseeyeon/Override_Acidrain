@@ -4,12 +4,9 @@ import java.awt.*;
 
 import javax.swing.*;
 
-/**
- * 플레이어 카드 (View 부품) - Player1(방장) / Player2(참가자) 두 번 생성해서 사용
- * 받은 값을 표시하기만 하고, 무엇을 표시할지는 LobbyView가 정함
- *
- * [WindowBuilder] 생성자 안의 배치 코드는 Design 탭에서 자유롭게 고쳐도 됨
- *                 아래 public 메소드 4개는 이름과 매개변수를 유지할 것
+/*
+플레이어 카드 (View 부품) - Player1(방장) / Player2(참가자) 두 번 생성해서 사용
+ 받은 값을 표시하기만 하고, 무엇을 표시할지는 LobbyView가 정함
  */
 public class PlayerCardPanel extends JPanel {
     private static final String EMPTY_SLOT_TEXT = "대기 중…";
