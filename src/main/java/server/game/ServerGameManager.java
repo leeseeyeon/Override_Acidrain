@@ -1,5 +1,10 @@
 package server.game;
 
+import server.game.item.ItemManager;
+import server.game.rule.WinCondition;
+import server.game.session.GameSession;
+import server.game.word.WordManager;
+
 public class ServerGameManager{
 	private GameSession session;
 	private WordManager wordManager;

@@ -1,4 +1,4 @@
-package server.game;
+package server.game.word;
 
 public class WordManager {
 
