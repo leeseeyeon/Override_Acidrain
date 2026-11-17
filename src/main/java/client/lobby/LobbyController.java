@@ -12,7 +12,6 @@ import common.message.lobby.*;
 대기실 Controller
 방장/참가자 차이는 myRole(LobbyRole)에게 맡김
 */
-
 public class LobbyController implements MessageListener, CountdownListener {
     private final LobbyModel lobbyModel;
     private final LobbyView lobbyView;
