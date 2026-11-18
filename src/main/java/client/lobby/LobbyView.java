@@ -11,7 +11,12 @@ import common.message.*;
 
 //MVC 중 View 담당. Observer!
 public class LobbyView extends JPanel implements LobbyModelListener {
-    private JLabel titleLabel;
+    //버튼 바활성화 상태(방장-"(Player2) 준비 중..."  게스트-"시작하길 기다리는 중...")
+	//해당 상태일 시 버튼 색상을 구분하기 위한 변수
+	private static final Color ACTION_BUTTON_ENABLED_COLOR = new Color(91, 91, 91);      // 누를 수 있을 때
+    private static final Color ACTION_BUTTON_DISABLED_COLOR = new Color(170, 170, 170);  // 누를 수 없을 때
+	
+	private JLabel titleLabel;
     private PlayerCardPanel hostCardPanel;
     private OptionPanel optionPanel;
     private PlayerCardPanel guestCardPanel;
@@ -103,6 +108,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
 
     public void updateActionButton(String text, boolean isEnabled) {
         lobbyActionButton.setText(text);
+        lobbyActionButton.setBackground(isEnabled ? ACTION_BUTTON_ENABLED_COLOR : ACTION_BUTTON_DISABLED_COLOR); 
         lobbyActionButton.setEnabled(isEnabled);
     }
 
