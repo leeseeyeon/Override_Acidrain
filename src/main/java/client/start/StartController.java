@@ -38,17 +38,20 @@ public class StartController implements MessageListener {
     }
 
     public void onGameStartButtonClicked() {
+        //응답을 기다리는 동안 JOIN이 서버로 여러번 나가는 것을 막음.
         if (isWaitingForJoinResult) {
             return;
         }
         String nickname = startView.getEnteredNickname();
         String nicknameWarning = nicknameValidator.findWarningMessage(nickname);
+         // 닉네임 유효성 검사에 걸린 경우.
         if (nicknameWarning != null) {
-            startView.showErrorMessage(nicknameWarning);   // 걸린 규칙에 맞는 경고
+            startView.showErrorMessage(nicknameWarning);  
             return;
         }
         startView.showErrorMessage(" ");
 
+        // 서버 연결에 실패한 경우.
         if (!connectIfNeeded()) {
             startView.showErrorMessage("서버에 연결할 수 없습니다.");
             return;
@@ -59,16 +62,17 @@ public class StartController implements MessageListener {
         sendToServer(new JoinMessage(nickname));
     }
 
-    private boolean connectIfNeeded() {
-        if (isConnected) {
-            return true;   // 닉네임 중복 후 재시도할 때는 같은 연결 재사용 (❓ 서버가 허용하는지 확인)
+    //아래 메소드 호출 시, 서버 연결 유/무 확인을 진행함.
+    private boolean connectIfNeeded() {  //연결
+        if (isConnected) { //이미 연결되어 있다면, 다시 연결하지 않고 true 반환
+            return true;  
         }
-        try {
-            serverConnection.connect(SERVER_IP, SERVER_PORT);
-            isConnected = true;
-            return true;
-        } catch (Exception e) {  
-            return false;
+        try { 
+            serverConnection.connect(SERVER_IP, SERVER_PORT); //처음 서버 연결시, 서버 연결. 📌
+            isConnected = true; //서버 연결에 성공한 것을 기억해두기 위함.
+            return true; 
+        } catch (Exception e) {  //📌부분에서 에러 발생 시(즉, 서버 연결 실패) 
+            return false; 
         }
     }
 
