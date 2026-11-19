@@ -26,6 +26,9 @@ public class PlayerStateData {
 	}
 	
 	//getter 메소드
+	public int getplayerId() {
+		return this.playerId;
+	}
 	public int getCurrentHp() {
 		return this.currentHp;
 	}
