@@ -2,12 +2,17 @@ package client.game;
 import java.awt.Color;
 
 public class AttackItemWord extends ClientFallingWord{
-	private String itenId;
+
 	private String effectType;
 	private Color highlightColor;
 	
+	//공격 아이템 생성자
+	public AttackItemWord(int id, String text, String effect) {
+		super(id, text);
+		this.effectType = effect;
+	}
+	
 	public String getEffectType() {
-		//TODO : 사용 효과를 가져옵니다
-		return null;
+		return effectType;
 	}
 }
