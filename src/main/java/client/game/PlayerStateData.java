@@ -8,7 +8,6 @@ public class PlayerStateData {
 	private double cpm;
 	private double accuracy;
 
-
 	//생성자
 	//PlayerState 기본 생성자
 	public PlayerStateData() {}
@@ -17,9 +16,12 @@ public class PlayerStateData {
 	public PlayerStateData(int Id, String name) {
 		this.playerId = Id;
 		this.nickname = name;
+		currentHp = maxHp;
 	}
+	
 	//데이터를 한번에 업데이트 하는 메소드 
-	public PlayerStateData(int hp, double cpm, double accuracy) {
+	public PlayerStateData(int Id, int hp, double cpm, double accuracy) {
+		this.playerId = Id;
 		this.currentHp = hp;
 		this.cpm = cpm;
 		this.accuracy =accuracy;
