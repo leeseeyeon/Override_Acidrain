@@ -1,4 +1,4 @@
-package server.game.session;
+package common;
 
 public class GameResult {
 	public void GameResult() {

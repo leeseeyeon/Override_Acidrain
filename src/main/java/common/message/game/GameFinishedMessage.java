@@ -1,5 +1,6 @@
 package common.message.game;
 
+import common.GameResult;
 import common.message.Message;
 import common.message.MessageType;
 
