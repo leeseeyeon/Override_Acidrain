@@ -9,7 +9,7 @@ public class GameClientModel {
 	private PlayerStateData Player2State;
 	private List<ClientFallingWord> activeFallingWords = new ArrayList<>();
 	private AttackItemWord centerItemWord;
-	private List<String> logMessage = new ArrayList<>();
+	private List<String> logs = new ArrayList<>();
 	private List<GameModelListener> listeners = new ArrayList<>();
 	
 	//상황별 게임 상태 업데이트
@@ -50,7 +50,7 @@ public class GameClientModel {
 	    
 	    // 로그 메시지 추가
 	    if (update.getLogMessage() != null && !update.getLogMessage().isBlank()) {
-	        this.logMessage.add(update.getLogMessage());
+	        this.logs.add(update.getLogMessage());
 	        stateChanged = true;
 	    }
 
@@ -124,6 +124,6 @@ public class GameClientModel {
 		return activeFallingWords;
 	}
 	public List<String> getLog(){
-		return logMessage;
+		return logs;
 	}
 }

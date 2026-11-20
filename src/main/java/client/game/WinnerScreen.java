@@ -3,7 +3,7 @@ package client.game;
 import javax.swing.*;
 import java.awt.*;
 
-public class WinnerScreenStrategy implements ResultScreenStrategy {
+public class WinnerScreen implements ResultScreen {
     private Image victoryBannerImage;
     private Color backgroundColor;
 

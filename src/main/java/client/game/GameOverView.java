@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 
 public class GameOverView extends JFrame {
-    private ResultScreenStrategy screenStrategy;
+    private ResultScreen screenStrategy;
     private GameResult gameResult;
     private JButton restartButton;
     private JButton mainMenuButton;
@@ -13,7 +13,7 @@ public class GameOverView extends JFrame {
         // TODO: 종료 화면 UI 컴포넌트 초기화
     }
 
-    public void setScreenStrategy(ResultScreenStrategy strategy) {
+    public void setScreenStrategy(ResultScreen strategy) {
         // TODO: 승리/패배 전략 설정
         this.screenStrategy = strategy;
     }
