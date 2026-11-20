@@ -16,32 +16,30 @@ public class JsonUtil {
     private static final Map<String, Class<? extends Message>> TYPES = new HashMap<>();
     static {
     	// 대기실 공통
-        TYPES.put(MessageType.CHAT,          ChatMessage.class);
-        TYPES.put(MessageType.READY,         ReadyMessage.class);
-        TYPES.put(MessageType.THEME,         ThemeMessage.class);
-        TYPES.put(MessageType.ERROR,         ErrorMessage.class);
-        TYPES.put(MessageType.START,         SignalMessage.class);
-        TYPES.put(MessageType.OPPONENT_LEFT, SignalMessage.class);
+        TYPES.put(MessageType.CHAT,          	ChatMessage.class);
+        TYPES.put(MessageType.READY,         	ReadyMessage.class);
+        TYPES.put(MessageType.THEME,         	ThemeMessage.class);
+        TYPES.put(MessageType.ERROR,         	ErrorMessage.class);
+        TYPES.put(MessageType.START,         	SignalMessage.class);
+        TYPES.put(MessageType.OPPONENT_LEFT, 	SignalMessage.class);
 
         // 대기실 클라 → 서버
-        TYPES.put(MessageType.JOIN,          JoinMessage.class);
+        TYPES.put(MessageType.JOIN,          	JoinMessage.class);
 
         // 대기실 서버 → 클라
-        TYPES.put(MessageType.JOINED,        JoinedMessage.class);
-        TYPES.put(MessageType.OPPONENT,      OpponentMessage.class);
-        TYPES.put(MessageType.ROLE,          RoleMessage.class);
-
-        // GAME_START: 게임 프로토콜 정해지면 추가
+        TYPES.put(MessageType.JOINED,        	JoinedMessage.class);
+        TYPES.put(MessageType.OPPONENT,      	OpponentMessage.class);
+        TYPES.put(MessageType.ROLE,          	RoleMessage.class);
         
         // 게임 클라 → 서버
-        //TYPES.put(MessageType.WORD_SUBMIT,          .class);
-        TYPES.put(MessageType.ITEM_INPUT,    ItemInputMessage.class);
-        TYPES.put(MessageType.GAME_QUIT,     SignalMessage.class);
+        TYPES.put(MessageType.WORD_SUBMIT,   	WordSubmitMessage.class);
+        TYPES.put(MessageType.ITEM_INPUT,    	ItemInputMessage.class);
+        TYPES.put(MessageType.GAME_QUIT,     	SignalMessage.class);
         
         // 게임 서버 → 클라
-        TYPES.put(MessageType.GAME_START,    GameStartMessage.class);
-        //TYPES.put(MessageType.GAME_STATE_UPDATE,      .class);
-        TYPES.put(MessageType.GAME_FINISHED, GameFinishedMessage.class);
+        TYPES.put(MessageType.GAME_START,    	GameStartMessage.class);
+        TYPES.put(MessageType.GAME_STATE_UPDATE,GameStateUpdateMessage.class);
+        TYPES.put(MessageType.GAME_FINISHED, 	GameFinishedMessage.class);
     }
 
     private JsonUtil() {}
