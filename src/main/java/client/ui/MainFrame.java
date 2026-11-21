@@ -31,7 +31,7 @@ public class MainFrame extends JFrame implements ScreenNavigator {
     private final LobbyController lobbyController;
 
     public MainFrame() {
-        setTitle("산성비");
+        setTitle("대머리를 지켜라!"); //제목 표시줄
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);   // 📌 1000 x 760 고정 배치. 수정 가능성O
 
