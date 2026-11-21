@@ -14,7 +14,7 @@ import common.message.lobby.*;
  * 흐름: 닉네임 검사 → 접속 → JOIN 전송 → (서버) JOINED 또는 ERROR
  *   - JOINED: 닉네임과 역할을 넘기며 대기실 화면으로 전환 (screenNavigator.showLobbyScreen)
  *   - ERROR : 시작 화면에 에러 표시
- * ℹ 이 객체는 connect() 전에 serverConnection.addListener(this)로 등록되어야 함
+ * 이 객체는 connect() 전에 serverConnection.addListener(this)로 등록되어야 함
  */
 public class StartController implements MessageListener {
     private final StartView startView;
@@ -43,7 +43,7 @@ public class StartController implements MessageListener {
         String nickname = startView.getEnteredNickname();
         String nicknameWarning = nicknameValidator.findWarningMessage(nickname);
         if (nicknameWarning != null) {
-            startView.showErrorMessage(nicknameWarning);   // 걸린 규칙에 맞는 경고
+            startView.showErrorMessage(nicknameWarning);   // 걸린 규칙에 맞는 경고를 view 에 넘김
             return;
         }
         startView.showErrorMessage(" ");
@@ -60,13 +60,13 @@ public class StartController implements MessageListener {
 
     private boolean connectIfNeeded() {
         if (isConnected) {
-            return true;   // 입장 실패 후 재시도할 때는 같은 연결 재사용 (서버는 연결을 끊지 않음)
+            return true;   // 입장 실패 후 재시도할 때는 같은 연결 재사용
         }
         try {
             serverConnection.connect(NetworkConfig.SERVER_IP, NetworkConfig.SERVER_PORT);   // 접속 주소는 common.NetworkConfig에서 관리
             isConnected = true;
             return true;
-        } catch (Exception e) {   // 서버가 꺼져 있거나 주소/포트가 틀림
+        } catch (Exception e) {   // 서버가 꺼져 있거나 주소/포트가 틀린경우
             return false;
         }
     }
