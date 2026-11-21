@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
-import common.message.lobby.JoinMessage;
+import common.message.lobby.*;
 import server.room.GameRoom;
 import server.room.RoomManager;
 
@@ -38,8 +38,14 @@ public class ClientHandler implements Runnable {
             log("연결 종료");
         } catch (IOException e) {
             log("연결 오류: " + e.getMessage());
-        } finally {
-            // TODO (이슈 16): room.leave(this), RoomManager.getInstance().removeIfEmpty(room)
+        } 
+        
+        finally {
+        	if (room != null) {
+                room.leave(this);
+                RoomManager.getInstance().removeRoom(room);   // 비었을 때만 삭제됨
+            }
+        	
             try {
                 if (!socket.isClosed()) socket.close();
             } catch (IOException e) {
@@ -56,16 +62,25 @@ public class ClientHandler implements Runnable {
             log("해석할 수 없는 메시지: " + request);
             return;
         }
+        
+        if (!m.getType().equals(MessageType.JOIN) && room == null) {
+            log("입장 전 메시지 무시: " + m.getType());
+            return;
+        }
 
         switch (m.getType()) {
             case MessageType.JOIN -> handleJoin((JoinMessage) m);
-            // TODO (이슈 16): CHAT, READY, THEME, START
+            case MessageType.CHAT  -> room.chat(this, ((ChatMessage) m).getContent());
+            case MessageType.READY -> room.setReady(this, ((ReadyMessage) m).isReady());
+            case MessageType.THEME -> room.setTheme(this, ((ThemeMessage) m).getTheme());
+            case MessageType.START -> room.start(this);
+            // TODO (게임 연동): WORD_SUBMIT, ITEM_INPUT, GAME_QUIT
             default -> log("아직 처리하지 않는 메시지: " + m.getType());
         }
     }
 
     private void handleJoin(JoinMessage m) {
-        if (room != null) return;               // 이미 방에 있으면 무시
+        if (room != null) return; // 이미 방에 있으면 무시
         nickname = m.getNickname();
         room = RoomManager.getInstance().assignRoom(this);
         log("방 " + room.getId() + " 입장");
