@@ -30,4 +30,13 @@ abstract class ClientFallingWord {
 		y = y - 20 * fallingSpeed * deltatime; 
 		lastTime = now;
 	}
+	public String getText() {
+		return text;
+	}
+	public float getY() {
+		return y;
+	}
+	public float getX() {
+		return x;
+	}
 }

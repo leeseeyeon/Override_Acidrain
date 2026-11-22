@@ -43,6 +43,9 @@ public class PlayerStateData {
 	public double Accuracy() {
 		return this.accuracy;
 	}
+	public int getMaxHp() {
+		return maxHp;
+	}
 }
 
 
