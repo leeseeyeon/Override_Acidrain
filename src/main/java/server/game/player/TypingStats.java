@@ -1,0 +1,48 @@
+package server.game.player;
+
+public class TypingStats {
+	private int totalTypedChars;
+	private double totalTypingTime;
+	private int totalTypedWords;
+	private int correctTypedChars;
+	private int correctTypedWords;
+	
+	public TypingStats() {
+		this.totalTypedChars = 0;
+		this.correctTypedChars = 0;
+		this.totalTypingTime =  0;
+		this.totalTypedWords = 0;
+		this.correctTypedWords=0;
+	}
+	
+	public void recordInput(String word, double typingTime,boolean isCorrect ) {
+		totalTypedChars += word.length();
+		totalTypingTime += typingTime;
+		totalTypedWords ++;
+		if(isCorrect) {
+			correctTypedChars += word.length();
+			correctTypedWords ++;
+		}
+		
+	}
+	
+	public double calculateCPM() {
+		if (totalTypingTime ==0) {
+			return 0;
+		}
+		
+		return correctTypedChars/totalTypingTime *60;
+		//CPM : 전체입력 글자수 / 전체 입력 시간(초) *60
+		//CPM : 1분동안 입력한 글자수 
+	}
+	
+	public double calculateAccuracy() {
+		//Accuracy : 정답 단어 수 / 전체 입력 단어 수 *100
+		//단어 기준 정확도
+		if(totalTypedWords == 0) {
+			return 0;
+		}
+		
+		return (double)correctTypedWords/totalTypedWords *100;
+	}
+}

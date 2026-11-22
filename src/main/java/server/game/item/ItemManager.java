@@ -1,5 +1,5 @@
-package server.game;
+package server.game.item;
 
 public class ItemManager {
-
+	
 }
