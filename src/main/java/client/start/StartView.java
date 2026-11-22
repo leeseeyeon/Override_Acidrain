@@ -26,25 +26,26 @@ public class StartView extends JPanel {
 
         descriptionPanel = new JPanel();
         descriptionPanel.setBackground(new Color(235, 235, 235));
-        descriptionPanel.setBounds(0, 275, 1000, 160);
+        descriptionPanel.setBounds(0, 275, 1000, 191);
         descriptionPanel.setLayout(null);
         add(descriptionPanel);
 
-        logoLabel = new JLabel("산성비");
+        logoLabel = new JLabel("대머리를 피해라!");
         logoLabel.setBounds(0, 173, 1000, 90);
         add(logoLabel);
         logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         logoLabel.setFont(new Font("맑은 고딕", Font.BOLD, 56));
         
-        descriptionLabel = new JLabel("<시나리오 설명>");   // TODO: 실제 설명 문구! 수정 필요.
+        descriptionLabel = new JLabel("<html><center>하늘에서 산성비가 내리기 시작합니다...<br><br>"
+                + "빠르게 단어를 입력해 산성비를 제거하세요!</center></html>"); // TODO: 실제 설명 문구! 수정 필요.
         descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         descriptionLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 18));
-        descriptionLabel.setBounds(0, 60, 1000, 40);
+        descriptionLabel.setBounds(0, 10, 1000, 171);
         descriptionPanel.add(descriptionLabel);
 
         nicknameFormPanel = new JPanel();
         nicknameFormPanel.setBackground(new Color(217, 217, 217));
-        nicknameFormPanel.setBounds(286, 496, 420, 200);
+        nicknameFormPanel.setBounds(286, 496, 420, 215);
         nicknameFormPanel.setLayout(null);
         add(nicknameFormPanel);
 
@@ -74,7 +75,7 @@ public class StartView extends JPanel {
         gameStartButton.setBorderPainted(false);
         gameStartButton.setFocusPainted(false);
         gameStartButton.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        gameStartButton.setBounds(111, 124, 200, 50);
+        gameStartButton.setBounds(111, 124, 200, 66);
         nicknameFormPanel.add(gameStartButton);
 
 
