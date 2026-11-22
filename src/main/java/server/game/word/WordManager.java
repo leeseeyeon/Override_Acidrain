@@ -8,16 +8,16 @@ public class WordManager {
 
     // 필드
     private WordRepository repository;
-    private List<String> wordList;
-    private List<FallingWord> activeWords;
+    private List<String> wordList; // 단어 후보 관리
+    private List<FallingWord> activeWords; //현재 낙하중인단어 & 정답 입력 시 해당 객체 제거
     private float fallSpeed;
     private int nextWordId;
 
     private Random random = new Random();
 
-    // 게임 화면 좌표 (임시)
-    private static final float SCREEN_WIDTH = 400f;
-    private static final float SCREEN_HEIGHT = 500f;
+    // 게임 화면 좌표
+    private static final float SCREEN_WIDTH = 300f;
+    private static final float SCREEN_HEIGHT =4500f;
 
     // 단계별 바닥 도달 시간 (밀리초)
     private static final long[] FALL_DURATIONS = {
@@ -32,8 +32,8 @@ public class WordManager {
         this.wordList = new ArrayList<>();
         this.activeWords = new ArrayList<>();
 
-        this.fallSpeed = 1.0f;
-        this.nextWordId = 1;
+        this.fallSpeed = 1.0f; // 커질수록 속도 상승... 이거 나중에 30초마다 레벨 올라감
+        this.nextWordId = 1; //새롭게 생성되는 단어에 고유한 id 부여 (같은 단어 여러번 등장해도 worldid는 서로 다르다)
     }
 
 
