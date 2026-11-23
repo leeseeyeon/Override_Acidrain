@@ -14,9 +14,9 @@ import common.message.*;
  */
 public class OptionPanel extends JPanel {
     private static final Color SELECTED_CARD_COLOR = new Color(91, 91, 91);
-    private static final Color UNSELECTED_CARD_COLOR = new Color(250, 247, 236);
-    private static final String HOST_GUIDE_TEXT = "단어 테마를 골라 주세요";
-    private static final String GUEST_GUIDE_TEXT = "방장이 단어 테마를 선택합니다";
+    private static final Color UNSELECTED_CARD_COLOR = new Color(255, 255, 255);
+    private static final String HOST_GUIDE_TEXT = "플레이할 단어 테마를 골라 주세요!";
+    private static final String GUEST_GUIDE_TEXT = "방장이 단어 테마를 선택하고 있습니다";
 
     private JLabel titleLabel;
     private JLabel guideLabel;
@@ -29,7 +29,7 @@ public class OptionPanel extends JPanel {
     private boolean isEditable = false; //참가자인 경우 테마 선택 불가.
 
     public OptionPanel() {
-        setBackground(new Color(226, 217, 181));
+        setBackground(new Color(193, 193, 193));
         setPreferredSize(new Dimension(440, 400));
         setLayout(null);
 
@@ -47,19 +47,19 @@ public class OptionPanel extends JPanel {
 
         //ThemeCard1 : 기본 단어 테마.
         basicThemeCard = new JToggleButton(Theme.BASIC.getDisplayName());
-        basicThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+        basicThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         basicThemeCard.setBounds(50, 108, 340, 80);
         add(basicThemeCard);
 
         //ThemeCard2 : 컴퓨터 용어 테마.
         csThemeCard = new JToggleButton(Theme.CS.getDisplayName());
-        csThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+        csThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         csThemeCard.setBounds(50, 200, 340, 80);
         add(csThemeCard);
 
         //ThemeCard3 : 영단어 테마.
         englishThemeCard = new JToggleButton(Theme.ENGLISH.getDisplayName());
-        englishThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+        englishThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         englishThemeCard.setBounds(50, 292, 340, 80);
         add(englishThemeCard);
 

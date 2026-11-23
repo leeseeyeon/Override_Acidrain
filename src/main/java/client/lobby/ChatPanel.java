@@ -13,7 +13,7 @@ public class ChatPanel extends JPanel {
     private JTextField chatInputField;
 
     public ChatPanel() {
-        setBackground(new Color(187, 220, 236));
+        setBackground(new Color(235, 235, 235));
         setPreferredSize(new Dimension(920, 170));
         setLayout(null);
 
@@ -25,7 +25,7 @@ public class ChatPanel extends JPanel {
         chatHistoryArea = new JTextArea();
         chatHistoryArea.setEditable(false);
         chatHistoryArea.setLineWrap(true);
-        chatHistoryArea.setBackground(new Color(187, 220, 236));
+        chatHistoryArea.setBackground(new Color(235, 235, 235));
         chatHistoryArea.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
         chatHistoryScrollPane.setViewportView(chatHistoryArea);
 

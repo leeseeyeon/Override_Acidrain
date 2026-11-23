@@ -11,7 +11,12 @@ import common.message.*;
 
 //MVC 중 View 담당. Observer!
 public class LobbyView extends JPanel implements LobbyModelListener {
-    private JLabel titleLabel;
+    //버튼 바활성화 상태(방장-"(Player2) 준비 중..."  게스트-"시작하길 기다리는 중...")
+	//해당 상태일 시 버튼 색상을 구분하기 위한 변수
+	private static final Color ACTION_BUTTON_ENABLED_COLOR = new Color(57, 135, 192);      // 누를 수 있을 때
+    private static final Color ACTION_BUTTON_DISABLED_COLOR = new Color(193, 193, 193);  // 누를 수 없을 때
+	
+	private JLabel titleLabel;
     private PlayerCardPanel hostCardPanel;
     private OptionPanel optionPanel;
     private PlayerCardPanel guestCardPanel;
@@ -52,13 +57,13 @@ public class LobbyView extends JPanel implements LobbyModelListener {
 
         lobbyActionButton = new JButton("준비");   // 디자인 확인 용 기본 글자. 실행 중에는 Controller가 updateActionButton()으로 바꿈
         lobbyActionButton.setForeground(Color.WHITE);
-        lobbyActionButton.setBackground(new Color(91, 91, 91));
+        lobbyActionButton.setBackground(new Color(57, 135, 192));
         lobbyActionButton.setContentAreaFilled(false);   // 기본 버튼 모양 대신 직접 칠한 배경 사용 (윈도우 테마에서도 진한 색이 보이도록)
         lobbyActionButton.setOpaque(true);                // setContentAreaFilled 다음에 와야 함
         lobbyActionButton.setBorderPainted(false);
         lobbyActionButton.setFocusPainted(false);
-        lobbyActionButton.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        lobbyActionButton.setBounds(340, 680, 320, 56);
+        lobbyActionButton.setFont(new Font("맑은 고딕", Font.BOLD, 22));
+        lobbyActionButton.setBounds(367, 681, 279, 58);
         add(lobbyActionButton);
     }
 
@@ -103,6 +108,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
 
     public void updateActionButton(String text, boolean isEnabled) {
         lobbyActionButton.setText(text);
+        lobbyActionButton.setBackground(isEnabled ? ACTION_BUTTON_ENABLED_COLOR : ACTION_BUTTON_DISABLED_COLOR); 
         lobbyActionButton.setEnabled(isEnabled);
     }
 

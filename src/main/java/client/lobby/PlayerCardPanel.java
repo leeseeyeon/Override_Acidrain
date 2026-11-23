@@ -9,6 +9,9 @@ import javax.swing.*;
  */
 public class PlayerCardPanel extends JPanel {
     private static final String EMPTY_SLOT_TEXT = "입장 대기 중…";
+    
+    private static final Color READY_BADGE_COLOR = new Color(91, 91, 91); // 준비 완료!: 진한 회색
+    private static final Color NOT_READY_BADGE_COLOR = new Color(193,193,193); // 준비 중...: 연한 회색
 
     private JLabel slotTitleLabel;
     private JLabel nicknameLabel;
@@ -16,8 +19,8 @@ public class PlayerCardPanel extends JPanel {
 
     /** WindowBuilder가 LobbyView 디자인 화면에서 이 패널을 그리려면 매개변수 없는 생성자가 필요 */
     public PlayerCardPanel() {
-        setBackground(new Color(217, 217, 217));
-        setPreferredSize(new Dimension(220, 400));
+    	setBackground(new Color(255, 255, 255));
+    	setBorder(BorderFactory.createLineBorder(new Color(0,0,0), 2));  
         setLayout(null);
 
         slotTitleLabel = new JLabel("Player");
@@ -62,7 +65,7 @@ public class PlayerCardPanel extends JPanel {
     /** 방장 화면에서 참가자 카드에 보이는 준비 상태 박스 */
     public void showReadyBadge(boolean isReady) {
         statusLabel.setOpaque(true);
-        statusLabel.setBackground(new Color(91, 91, 91));
+        statusLabel.setBackground(isReady ? READY_BADGE_COLOR : NOT_READY_BADGE_COLOR); //게스트 준비 상태에 따라 방장 화면의 버튼 색 다르게
         statusLabel.setForeground(Color.WHITE);
         statusLabel.setText(isReady ? "준비 완료!" : "준비 중…");
         statusLabel.repaint();
