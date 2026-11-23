@@ -20,7 +20,7 @@ public class ServerConnection {
 	public void connect(String host, int port) throws IOException {
 		socket = new Socket(host, port);
 		out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
-		new Thread(new ChatClientReceiveThread(socket, this)).start();
+		new Thread(new ClientReceiveThread(socket, this)).start();
 	}
 	
 	public void send(Message message) {
@@ -52,6 +52,13 @@ public class ServerConnection {
 			System.out.println("연결 종료 중 오류: " + e.getMessage()); // 오류메시지를 간단히
 		}
 		
+	}
+	
+	void notifyDisconnected() {
+	    disconnect();  // 소켓 정리
+	    for (MessageListener ml : listeners) {
+	    	ml.onDisconnected();
+	    }
 	}
 
 }
