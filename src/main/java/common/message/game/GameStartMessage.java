@@ -9,7 +9,6 @@ public class GameStartMessage extends Message {
     private Theme theme;
     private PlayerProfile player1;
     private PlayerProfile player2;
-    private int myPlayerId;
 
     // Gson이 받을 때 쓰는 생성자
     private GameStartMessage() {
@@ -17,13 +16,12 @@ public class GameStartMessage extends Message {
     }
 
     // 서버가 보낼 때 쓰는 생성자 (각자에게 myPlayerId만 다르게)
-    public GameStartMessage(int gameId, Theme theme, PlayerProfile player1, PlayerProfile player2, int myPlayerId) {
+    public GameStartMessage(int gameId, Theme theme, PlayerProfile player1, PlayerProfile player2) {
         this();
         this.gameId = gameId;
         this.theme = theme;
         this.player1 = player1;
         this.player2 = player2;
-        this.myPlayerId = myPlayerId;
     }
 
     public int getGameId() {
@@ -40,9 +38,5 @@ public class GameStartMessage extends Message {
     
     public PlayerProfile getPlayer2() {
     	return player2;
-    }
-    
-    public int getMyPlayerId() {
-    	return myPlayerId;
     }
 }

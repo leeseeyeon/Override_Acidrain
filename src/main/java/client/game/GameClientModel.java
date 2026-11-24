@@ -9,6 +9,8 @@ import common.message.game.AttackItemWord;
 import common.message.game.ClientFallingWord;
 import common.message.game.PlayerStateData;
 
+import common.message.game.PlayerStateData;
+
 public class GameClientModel {
 	private int localPlayerId = -1;
 	private PlayerStateData Player1State; // ID가 작은 플레이어

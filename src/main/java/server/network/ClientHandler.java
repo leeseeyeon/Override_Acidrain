@@ -20,8 +20,9 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private GameRoom room;
     private PrintWriter pw;
+    private int playerId;
 
-    public ClientHandler(Socket socket) {
+	public ClientHandler(Socket socket) {
         this.socket = socket;
     }
 
@@ -93,6 +94,14 @@ public class ClientHandler implements Runnable {
     public String getNickname() {
         return nickname;
     }
+    
+    public int getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(int playerId) {
+		this.playerId = playerId;
+	}
 
     private void log(String msg) {
         System.out.println("[" + (nickname != null ? nickname : socket.getRemoteSocketAddress()) + "] " + msg);
