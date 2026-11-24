@@ -3,6 +3,8 @@ package client.game;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.message.game.PlayerStateData;
+
 public class GameClientModel {
 	private List<PlayerStateData> playerstates = new ArrayList<>();;
 	private PlayerStateData Player1State;

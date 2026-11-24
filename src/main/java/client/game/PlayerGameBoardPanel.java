@@ -18,6 +18,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import common.message.game.PlayerStateData;
+
 public class PlayerGameBoardPanel extends JPanel {
     private static final int BOARD_WIDTH = 350;
     private static final int BOARD_HEIGHT = 400;
