@@ -11,7 +11,7 @@ public class WordSubmitMessage extends Message {
 		super(MessageType.WORD_SUBMIT);
 	}
 	
-	public WordSubmitMessage(int wordId, String word, double typingTime) {
+	public WordSubmitMessage(String word, double typingTime) {
 		this();
 		this.word = word;
 		this.typingTime = typingTime;
