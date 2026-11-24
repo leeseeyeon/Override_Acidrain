@@ -189,4 +189,16 @@ public class WordManager {
 
         return new ArrayList<>(activeWords);
     }
+    
+    // 아이템 생성에 사용할 랜덤 단어 반환
+    public String getRandomWord() {
+
+        if (wordList.isEmpty()) {
+            return null;
+        }
+
+        int index = random.nextInt(wordList.size());
+
+        return wordList.get(index);
+    }
 }
