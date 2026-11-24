@@ -1,5 +1,6 @@
 package server.game.item;
 
+import common.ItemType;
 import server.game.player.*;
 public class Item {
 	private int itemId; //아이템 고유번호
@@ -9,9 +10,11 @@ public class Item {
 	private Integer claimedBy; //어떤 플레이어가 먼저 획득했는지 , Integer은 null을 쓸 수 있다.
 	private long spawnTime; //아이템이 생성된 시각
 	private long reachBottomTime; //아이템이 바닥에 도달하는 시간
+	private ItemType type;
+	private float y; //y좌표
 	
 	
-	public Item(int itemId, String word, ItemEffect effect, long spawnTime, long reachBottomTime) {
+	public Item(int itemId, String word, ItemEffect effect, long spawnTime, long reachBottomTime, ItemType type) {
 		this.itemId = itemId;
 		this.word = word;
 		this.effect = effect;
@@ -20,6 +23,9 @@ public class Item {
 		
 		this.isActive = true;
 		this.claimedBy = null;
+		
+		this.type = type;
+		this.y =0;
 	}
 	
 	//플레이어가 아이템을 획득하도록 처리 synchronized : 동기화 처리 같은 item 객체의 claim은 한 번에 하나의 스레드에만 실행할 수 있다.
@@ -45,6 +51,21 @@ public class Item {
 	//아이템이 유효시간을 지났는지 확인
 	public boolean isExpired(long now) {
 		return now>=reachBottomTime;
+	}
+	
+	public void updatePosition(long now, float bottomY) {
+		long totalTime = reachBottomTime - spawnTime;
+		long elapsedTime = now - spawnTime;
+		
+		if (totalTime <=0) {
+			y=bottomY;
+			return;
+		}
+		
+		float progress = (float) elapsedTime / totalTime;
+		
+		progress = Math.max(0, Math.min(1, progress));
+		y=bottomY*progress;
 	}
 	
 	//획득한 아이템의 효과 적용
@@ -81,5 +102,13 @@ public class Item {
 	
 	public long getReachBottomTime() {
 		return reachBottomTime;
+	}
+	
+	public ItemType getType() {
+		return type;
+	}
+	
+	public float getY() {
+		return y;
 	}
 }

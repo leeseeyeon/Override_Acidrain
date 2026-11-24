@@ -5,7 +5,7 @@ public class TypingStats {
 	private double totalTypingTime;
 	private int totalTypedWords;//전체 쓴 단어
 	private int correctTypedChars;//맞게 친 글자수
-	private int correctTypedWords;//맞게 친 글자
+	private int correctTypedWords;//맞게 친 단어 수
 	
 	public TypingStats() {
 		this.totalTypedChars = 0;
@@ -32,7 +32,7 @@ public class TypingStats {
 		}
 		
 		return correctTypedChars/totalTypingTime *60;
-		//CPM : 전체입력 글자수 / 전체 입력 시간(초) *60
+		//CPM : 맞게 입력한 글자수 / 전체 입력 시간(초) *60
 		//CPM : 1분동안 입력한 글자수 
 	}
 	

@@ -17,7 +17,7 @@ public class WordManager {
 
     // 게임 화면 좌표
     private static final float SCREEN_WIDTH = 300f;
-    private static final float SCREEN_HEIGHT =4500f;
+    public static final float SCREEN_HEIGHT =400f;
 
     // 단계별 바닥 도달 시간 (밀리초)
     private static final long[] FALL_DURATIONS = {
@@ -87,30 +87,45 @@ public class WordManager {
 
 
     // 3. 플레이어의 단어 입력 처리
-    public boolean processWordInput(int wordId, String text) {
+    public boolean processWordInput(String text) {
+
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+
+        FallingWord targetWord = null;
 
         for (FallingWord word : activeWords) {
 
-            if (word.getWordId() == wordId) {
-
-                // 이미 완료했거나 바닥에 도달한 단어는 처리하지 않음
-                if (word.isCompleted() ||
-                    word.hasReachedBottom(System.currentTimeMillis())) {
-                    return false;
-                }
-
-                // 입력한 단어가 일치하는지 확인
-                if (word.getText().equals(text)) {
-
-                    word.markCompleted();
-
-                    activeWords.remove(word);
-
-                    return true;
-                }
-
-                return false;
+            // 이미 완료했거나 바닥에 도달한 단어는 제외
+            if (word.isCompleted() || word.hasReachedBottom(now)) {
+                continue;
             }
+
+            // 입력한 텍스트와 일치하는 단어 검색
+            if (word.getText().equals(text)) {
+
+                // 동일한 단어가 여러 개라면
+                // 바닥 도달 예정 시각이 가장 빠른 단어 선택
+                if (targetWord == null ||
+                    word.getReachBottomTime() <
+                    targetWord.getReachBottomTime()) {
+
+                    targetWord = word;
+                }
+            }
+        }
+
+        // 일치하는 단어가 존재하는 경우
+        if (targetWord != null) {
+
+            targetWord.markCompleted();
+
+            activeWords.remove(targetWord);
+
+            return true;
         }
 
         return false;
