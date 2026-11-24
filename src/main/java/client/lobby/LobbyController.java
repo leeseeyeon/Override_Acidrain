@@ -183,14 +183,14 @@ public class LobbyController implements MessageListener, CountdownListener {
         gameStartCountdown.start(this);
     }
 
-    /* 서버 규칙: HOST면 두 id 중 작은 번호, GUEST면 큰 번호 (GAME_START에 내 id가 따로 없음) */
+    /* HOST면 두 id 중 작은 번호, GUEST면 큰 번호 */
     private int findMyPlayerId(GameStartMessage gameStartMessage) {
         int player1Id = gameStartMessage.getPlayer1().getPlayerId();
         int player2Id = gameStartMessage.getPlayer2().getPlayerId();
         if (lobbyModel.isLocalPlayerHost()) {
             return Math.min(player1Id, player2Id);   // 방장: 작은 번호
         }
-        return Math.max(player1Id, player2Id);       // 참가자: 큰 번호
+        return Math.max(player1Id, player2Id);       // 게스트: 큰 번호
     }
 
     private void handleLobbyError(ErrorMessage errorMessage) {
@@ -211,7 +211,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     public void onCountdownFinished() {
         isInLobby = false;
         lobbyModel.setCountingDown(false);
-        screenNavigator.showGameScreen(pendingGameStart, myPlayerId);   // 게임 시작 정보 + 내 id 전달   
+        screenNavigator.showGameScreen(pendingGameStart, myPlayerId);   // 게임 시작 정보 + 플레이어 고유 id 전달   
     }
 
 
