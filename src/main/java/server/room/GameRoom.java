@@ -15,6 +15,7 @@ import server.network.ClientHandler;
 
 public class GameRoom {
 	private static final AtomicInteger NEXT_GAME_ID = new AtomicInteger(1); // 모든 방이 공유하는 게임 번호
+	private static final AtomicInteger NEXT_PLAYER_ID = new AtomicInteger(1); // 고유한 playerId
 	
     private final int id;
     private ClientHandler host;
@@ -34,6 +35,8 @@ public class GameRoom {
         if (state != RoomState.WAITING || guest != null) {
             return false;
         }
+        
+        player.setPlayerId(NEXT_PLAYER_ID.getAndIncrement());  // 입장 성공할 때만 발급
         
         if (host == null) {
             host = player;
@@ -92,8 +95,8 @@ public class GameRoom {
         state = RoomState.PLAYING;
 
         int gameId = NEXT_GAME_ID.getAndIncrement();
-        PlayerProfile p1 = new PlayerProfile(1, host.getNickname());
-        PlayerProfile p2 = new PlayerProfile(2, guest.getNickname());
+        PlayerProfile p1 = new PlayerProfile(host.getPlayerId(), host.getNickname());
+        PlayerProfile p2 = new PlayerProfile(guest.getPlayerId(), guest.getNickname());
 
         // myPlayerId가 사람마다 달라서 broadcast 대신 따로 전송
         host.send(new GameStartMessage(gameId, theme, p1, p2, 1));
