@@ -1,4 +1,4 @@
-ppackage common.message.game;
+package common.message.game;
 
 public class PlayerStateData {
 	private int playerId;
