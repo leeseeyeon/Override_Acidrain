@@ -3,9 +3,9 @@ package server.game.player;
 public class TypingStats {
 	private int totalTypedChars;
 	private double totalTypingTime;
-	private int totalTypedWords;
-	private int correctTypedChars;
-	private int correctTypedWords;
+	private int totalTypedWords;//전체 쓴 단어
+	private int correctTypedChars;//맞게 친 글자수
+	private int correctTypedWords;//맞게 친 글자
 	
 	public TypingStats() {
 		this.totalTypedChars = 0;

@@ -1,7 +1,8 @@
 package server.game.word;
+import common.message.Theme;
+
 
 import java.util.List;
-import server.game.Theme;
 
 public interface WordRepository {
 
