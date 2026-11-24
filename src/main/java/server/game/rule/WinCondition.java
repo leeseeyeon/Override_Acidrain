@@ -1,5 +1,6 @@
 package server.game.rule;
-
-public class WinCondition {
-
+import server.game.player.Player;
+import server.game.session.GameSession;
+public interface WinCondition {
+	public Player determineWinner(GameSession session);
 }

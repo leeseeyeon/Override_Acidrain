@@ -12,6 +12,7 @@ import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
 import common.message.lobby.*;
+import common.message.game.WordSubmitMessage;
 import server.room.GameRoom;
 import server.room.RoomManager;
 
@@ -42,10 +43,7 @@ public class ClientHandler implements Runnable {
         } 
         
         finally {
-        	if (room != null) {
-                room.leave(this);
-                RoomManager.getInstance().removeRoom(room);   // 비었을 때만 삭제됨
-            }
+        	leaveRoom();
         	
             try {
                 if (!socket.isClosed()) socket.close();
@@ -75,7 +73,11 @@ public class ClientHandler implements Runnable {
             case MessageType.READY -> room.setReady(this, ((ReadyMessage) m).isReady());
             case MessageType.THEME -> room.setTheme(this, ((ThemeMessage) m).getTheme());
             case MessageType.START -> room.start(this);
-            // TODO (게임 연동): WORD_SUBMIT, ITEM_INPUT, GAME_QUIT
+            case MessageType.WORD_SUBMIT -> {
+                WordSubmitMessage w = (WordSubmitMessage) m;
+                room.submitWord(this, w.getWord(), w.getTypingTime());
+            }
+            case MessageType.GAME_QUIT -> leaveRoom();
             default -> log("아직 처리하지 않는 메시지: " + m.getType());
         }
     }
@@ -85,6 +87,14 @@ public class ClientHandler implements Runnable {
         nickname = m.getNickname();
         room = RoomManager.getInstance().assignRoom(this);
         log("방 " + room.getId() + " 입장");
+    }
+
+    // 방 나가기 (GAME_QUIT, 연결 끊김 공통)
+    private void leaveRoom() {
+        if (room == null) return;
+        room.leave(this);
+        RoomManager.getInstance().removeRoom(room);   // 비었을 때만 삭제됨
+        room = null;
     }
 
     public synchronized void send(Message message) {
