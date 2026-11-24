@@ -22,20 +22,25 @@ public class ItemManager {
     }
 
     // 확률에 따라 랜덤 아이템 생성
-    public synchronized Item spawnRandomItem(String word, float speed) {
-
+    public synchronized Item spawnRandomItem(String word,float speed) {
+    	removeExpiredItems(System.currentTimeMillis());
+    	
+    	if (!activeItems.isEmpty()) {
+            return null;
+        }
+    	
         if (Math.random() >= spawnProbability) {
             return null;
         }
 
-        Item item = itemFactory.createRandomItem(word, speed);
+        Item item = itemFactory.createRandomItem(word,speed);
         activeItems.add(item);
 
         return item;
     }
 
     // 아이템 단어 입력 처리
-    public synchronized boolean processItemInput(int playerId, int itemId, String text) {
+    public synchronized boolean processItemInput(int playerId, String text) {
 
         // 입력한 플레이어와 상대방 가져오기
         Player user = session.getPlayer(playerId);
@@ -49,8 +54,7 @@ public class ItemManager {
         for (Item item : activeItems) {
 
             // 아이템 ID와 입력 단어가 일치하는지 확인
-            if (item.getItemId() == itemId
-                    && item.getWord().equals(text)) {
+            if (item.getWord().equals(text)) {
 
                 // 아이템 획득 가능 여부 확인
                 if (item.claim(playerId)) {
@@ -59,7 +63,7 @@ public class ItemManager {
                     item.applyEffect(user, opponent);
 
                     // 획득한 아이템 제거
-                    removeItem(itemId);
+                    removeItem(item.getItemId());
 
                     return true;
                 }
@@ -69,6 +73,13 @@ public class ItemManager {
         }
 
         return false;
+    }
+    public synchronized void updateItems(long now, float bottomY) {
+    	removeExpiredItems(now);
+    	
+    	for(Item item : activeItems) {
+    		item.updatePosition(now, bottomY);
+    	}
     }
 
     // 특정 아이템 삭제

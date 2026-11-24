@@ -141,68 +141,45 @@ public class ServerGameManager {
     }
 
 
-    // 4. 일반 단어 입력 처리
+ // 4,5통합 .일반 단어 및 아이템 단어 입력 처리
     public synchronized void processInput(
-            int playerId, int wordId,
-            String word, double typingTime) {
+            int playerId, String word, double typingTime) {
 
+        // 게임 진행 중인지 확인
         if (session.getStatus() != GameStatus.PLAYING) {
             return;
         }
 
+        // 입력한 플레이어와 해당 WordManager 가져오기
         Player player = session.getPlayer(playerId);
         WordManager wordManager = getWordManager(playerId);
 
+        // 유효하지 않은 플레이어인 경우
         if (player == null || wordManager == null) {
             return;
         }
 
-        if (word == null || !Double.isFinite(typingTime)
+        // 유효하지 않은 입력인 경우
+        if (word == null || word.isBlank()
+                || !Double.isFinite(typingTime)
                 || typingTime <= 0) {
             return;
         }
 
-        // 단어 입력 성공 여부 확인
+        // 1. 아이템 단어인지 먼저 확인
         boolean isCorrect =
-                wordManager.processWordInput(wordId, word);
+                itemManager.processItemInput(playerId, word);
 
-        // 타수 및 정확도 기록
+        // 2. 아이템 단어가 아니라면 일반 단어 확인
+        if (!isCorrect) {
+            isCorrect = wordManager.processWordInput(word);
+        }
+
+        // 3. 타수 및 정확도 기록
         player.getTypingStats().recordInput(
                 word, typingTime, isCorrect);
 
-        checkGameOver();
-    }
-
-
-    // 5. 아이템 단어 입력 처리
-    public synchronized void processItemInput(
-            int playerId, int itemId,
-            String word, double typingTime) {
-
-        if (session.getStatus() != GameStatus.PLAYING) {
-            return;
-        }
-
-        Player player = session.getPlayer(playerId);
-
-        if (player == null) {
-            return;
-        }
-
-        if (word == null || !Double.isFinite(typingTime)
-                || typingTime <= 0) {
-            return;
-        }
-
-        // 아이템 획득 및 효과 적용
-        boolean isCorrect = itemManager.processItemInput(
-                playerId, itemId, word);
-
-        // 타수 및 정확도 기록
-        player.getTypingStats().recordInput(
-                word, typingTime, isCorrect);
-
-        // 아이템 효과로 HP가 0이 되었는지 확인
+        // 4. 게임 종료 여부 확인
         checkGameOver();
     }
 
@@ -219,7 +196,7 @@ public class ServerGameManager {
         // 속도 레벨 변경
         updateSpeedLevel(now);
 
-        // 단어 위치 갱신
+        // 일반 단어 위치 갱신
         player1WordManager.updateWordPositions(now);
         player2WordManager.updateWordPositions(now);
 
@@ -236,10 +213,10 @@ public class ServerGameManager {
 
         session.getPlayer2().decreaseHP(
                 missedWords2.size() * MISS_DAMAGE);
-
-        // 만료된 아이템 제거
-        itemManager.removeExpiredItems(now);
-
+        
+        //아이템 위치 갱신 및 만료 처리
+        itemManager.updateItems(now,WordManager.SCREEN_HEIGHT);
+        
         // 게임 종료 여부 확인
         if (checkGameOver()) {
             return;
