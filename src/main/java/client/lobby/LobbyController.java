@@ -6,6 +6,7 @@ import javax.swing.*;
 import client.network.*;
 import client.ui.*;
 import common.message.*;
+import common.message.game.*;
 import common.message.lobby.*;
 
 /*
@@ -18,10 +19,13 @@ public class LobbyController implements MessageListener, CountdownListener {
     private final ServerConnection serverConnection;
     private final ScreenNavigator screenNavigator;
     private final GameStartCountdown gameStartCountdown;
-    private final GameStartCountdown returnToStartCountdown = new GameStartCountdown();   // 🔥🔥연결 끊김 후 3, 2, 1 (게임 시작용과 별개. 카운트다운 재사용)
+    private final GameStartCountdown returnToStartCountdown = new GameStartCountdown();   // 연결 끊김 후 3, 2, 1 (게임 시작용과 별개)
 
     private LobbyRole myRole = new GuestRole();
     private boolean isInLobby = false;
+
+    private GameStartMessage pendingGameStart;   // GAME_START 정보 (카운트다운이 끝나면 게임 화면에 넘김)
+    private int myPlayerId;                      // 게임에서 쓸 내 고유 id (GAME_START에 따로 없어서 직접 계산)
 
     public LobbyController(LobbyModel lobbyModel, LobbyView lobbyView, ServerConnection serverConnection,
                            ScreenNavigator screenNavigator, GameStartCountdown gameStartCountdown) {
@@ -79,13 +83,13 @@ public class LobbyController implements MessageListener, CountdownListener {
         SwingUtilities.invokeLater(() -> handleServerMessage(json));
     }
 
-    /* 🔥🔥서버 쪽에서 연결이 끊겼을 때 받기 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
+    /* 서버 쪽에서 연결이 끊겼을 때 받기 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
     @Override
     public void onDisconnected() {
         SwingUtilities.invokeLater(this::handleDisconnected);
     }
 
-    /* 🔥🔥대기실에서 끊기면: 안내 → 3, 2, 1 → 시작 화면 */
+    /* 대기실에서 끊기면: 안내 → 3, 2, 1 → 시작 화면 */
     private void handleDisconnected() {
         if (!isInLobby) {
             return;   // 시작 화면, 게임 화면에서는 그 화면이 처리
@@ -104,7 +108,7 @@ public class LobbyController implements MessageListener, CountdownListener {
             }
 
             @Override
-            public void onCountdownFinished() { //시작화면으로 복귀
+            public void onCountdownFinished() {
                 screenNavigator.showStartScreen();
             }
         });
@@ -126,7 +130,7 @@ public class LobbyController implements MessageListener, CountdownListener {
             case MessageType.CHAT          -> handleChatReceived((common.message.lobby.ChatMessage) message);
             case MessageType.ROLE          -> handleRoleChanged((RoleMessage) message);
             case MessageType.OPPONENT_LEFT -> handleOpponentLeft();
-            case MessageType.GAME_START    -> handleGameStarted();
+            case MessageType.GAME_START    -> handleGameStarted((GameStartMessage) message);
             case MessageType.ERROR         -> handleLobbyError((ErrorMessage) message);
             default -> { /* 대기실과 무관한 메시지는 무시 */ }
         }
@@ -171,10 +175,22 @@ public class LobbyController implements MessageListener, CountdownListener {
         refreshActionButton();
     }
 
-    private void handleGameStarted() {
+    private void handleGameStarted(GameStartMessage gameStartMessage) {
+        pendingGameStart = gameStartMessage;
+        myPlayerId = findMyPlayerId(gameStartMessage);
         lobbyModel.setCountingDown(true);
         refreshActionButton();
         gameStartCountdown.start(this);
+    }
+
+    /* 서버 규칙: HOST면 두 id 중 작은 번호, GUEST면 큰 번호 (GAME_START에 내 id가 따로 없음) */
+    private int findMyPlayerId(GameStartMessage gameStartMessage) {
+        int player1Id = gameStartMessage.getPlayer1().getPlayerId();
+        int player2Id = gameStartMessage.getPlayer2().getPlayerId();
+        if (lobbyModel.isLocalPlayerHost()) {
+            return Math.min(player1Id, player2Id);   // 방장: 작은 번호
+        }
+        return Math.max(player1Id, player2Id);       // 참가자: 큰 번호
     }
 
     private void handleLobbyError(ErrorMessage errorMessage) {
@@ -195,7 +211,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     public void onCountdownFinished() {
         isInLobby = false;
         lobbyModel.setCountingDown(false);
-        screenNavigator.showGameScreen();   
+        screenNavigator.showGameScreen(pendingGameStart, myPlayerId);   // 게임 시작 정보 + 내 id 전달   
     }
 
 
