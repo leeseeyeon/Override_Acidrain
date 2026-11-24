@@ -4,31 +4,25 @@ import common.message.Message;
 import common.message.MessageType;
 
 public class WordSubmitMessage extends Message {
-	private int wordId;
 	private String word;
-	private long inputTime;
+	private double typingTime;
 	
 	private WordSubmitMessage() {
 		super(MessageType.WORD_SUBMIT);
 	}
 	
-	public WordSubmitMessage(int wordId, String word, long inputTime) {
+	public WordSubmitMessage(int wordId, String word, double typingTime) {
 		this();
-		this.wordId = wordId;
 		this.word = word;
-		this.inputTime = inputTime;
-	}
-	
-	public int getWordId() {
-		return wordId;
+		this.typingTime = typingTime;
 	}
 	
 	public String getWord() {
 		return word;
 	}
 	
-	public long getInputTime() {
-		return inputTime;
+	public double getTypingTime() {
+		return typingTime;
 	}
 
 }

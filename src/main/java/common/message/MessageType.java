@@ -21,7 +21,6 @@ public class MessageType {
     
     
     // 게임 클라 → 서버
-    public static final String ITEM_INPUT         = "ITEM_INPUT";         // itemId, text, typingTime
     public static final String GAME_QUIT          = "GAME_QUIT";          // 필드 없음
     public static final String WORD_SUBMIT        = "WORD_SUBMIT";        // 미정
     

@@ -33,7 +33,6 @@ public class JsonUtil {
         
         // 게임 클라 → 서버
         TYPES.put(MessageType.WORD_SUBMIT,   	WordSubmitMessage.class);
-        TYPES.put(MessageType.ITEM_INPUT,    	ItemInputMessage.class);
         TYPES.put(MessageType.GAME_QUIT,     	SignalMessage.class);
         
         // 게임 서버 → 클라
