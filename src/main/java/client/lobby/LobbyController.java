@@ -18,6 +18,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     private final ServerConnection serverConnection;
     private final ScreenNavigator screenNavigator;
     private final GameStartCountdown gameStartCountdown;
+    private final GameStartCountdown returnToStartCountdown = new GameStartCountdown();   // 🔥🔥연결 끊김 후 3, 2, 1 (게임 시작용과 별개. 카운트다운 재사용)
 
     private LobbyRole myRole = new GuestRole();
     private boolean isInLobby = false;
@@ -64,7 +65,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     }
 
     public void onChatEntered(String content) {
-        if (content == null || content.isBlank()) {
+        if (!isInLobby || content == null || content.isBlank()) {   // 연결이 끊긴 뒤에는 보내지 않음
             return;
         }
         sendToServer(new common.message.lobby.ChatMessage(content.trim()));   // 내 채팅도 서버가 돌려줄 때 표시
@@ -76,6 +77,37 @@ public class LobbyController implements MessageListener, CountdownListener {
     @Override
     public void update(String json) {
         SwingUtilities.invokeLater(() -> handleServerMessage(json));
+    }
+
+    /* 🔥🔥서버 쪽에서 연결이 끊겼을 때 받기 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
+    @Override
+    public void onDisconnected() {
+        SwingUtilities.invokeLater(this::handleDisconnected);
+    }
+
+    /* 🔥🔥대기실에서 끊기면: 안내 → 3, 2, 1 → 시작 화면 */
+    private void handleDisconnected() {
+        if (!isInLobby) {
+            return;   // 시작 화면, 게임 화면에서는 그 화면이 처리
+        }
+        isInLobby = false;              // 이후 서버 메시지와 입력 무시
+        gameStartCountdown.cancel();    // 게임 시작 카운트다운 중이었다면 취소
+
+        lobbyView.updateActionButton("연결 끊김", false);
+        lobbyView.setOptionEditable(false);
+        lobbyModel.addChatMessage(ChatMessage.system("서버와의 연결이 끊겼습니다. 시작 화면으로 돌아갑니다."));
+
+        returnToStartCountdown.start(new CountdownListener() {
+            @Override
+            public void onCountdownTicked(int remainingSeconds) {
+                lobbyModel.addChatMessage(ChatMessage.system(remainingSeconds + "..."));
+            }
+
+            @Override
+            public void onCountdownFinished() { //시작화면으로 복귀
+                screenNavigator.showStartScreen();
+            }
+        });
     }
 
     private void handleServerMessage(String json) {
