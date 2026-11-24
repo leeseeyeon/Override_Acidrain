@@ -2,13 +2,14 @@ package client.game;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import common.message.game.PlayerStateData;
+import client.network.ServerConnection;
+import common.GameResult;
+import common.message.game.*;
+import javax.swing.SwingUtilities;
 
 public class GameController implements ActionListener, GameModelListener {
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS
@@ -19,7 +20,7 @@ public class GameController implements ActionListener, GameModelListener {
     private ServerConnection serverConnection;
 
     private Timer gameLoopTimer;
-    private int localPlayerId = 1;
+    private int localPlayerId = -1;
     private boolean isGameRunning = false;
 
     public GameController(GameClientModel model, GameView view, ServerConnection connection) {
@@ -39,12 +40,20 @@ public class GameController implements ActionListener, GameModelListener {
         if (this.gameView != null) {
             this.gameView.setWordSubmitListener(this);
         }
+        
+     // 서버 연결 끊김 감지 시 3초 오버레이 후 StartView로 복귀
+        if (this.serverConnection != null) {
+            this.serverConnection.setOnDisconnectedListener(() -> onServerDisconnected());
+        }
     }
 
     public void setLocalPlayerId(int playerId) {
-        this.localPlayerId = (playerId == 2) ? 2 : 1;
+        this.localPlayerId = playerId;
+        if (this.gameModel != null) {
+            this.gameModel.setLocalPlayerId(playerId);
+        }
         if (this.gameView != null) {
-            this.gameView.setLocalPlayerId(this.localPlayerId);
+            this.gameView.setLocalPlayerId(playerId);
         }
     }
 
@@ -53,7 +62,7 @@ public class GameController implements ActionListener, GameModelListener {
         bindGameOverViewListeners();
     }
 
-    public void onWordSubmitted(String word) {
+    public void onWordSubmitted(String word, double typingTime) {
         if (!isGameRunning || word == null) {
             return;
         }
@@ -64,11 +73,12 @@ public class GameController implements ActionListener, GameModelListener {
         }
 
         if (serverConnection != null) {
-            serverConnection.sendWordInput(trimmedWord);
+            WordSubmitMessage message = new WordSubmitMessage(trimmedWord, typingTime);
+            serverConnection.send(message);
         }
     }
 
-    public void onGameStateReceived(GameStateUpdate update) {
+    public void onGameStateReceived(Game_State_Update update) {
         if (update == null || gameModel == null) {
             return;
         }
@@ -80,17 +90,19 @@ public class GameController implements ActionListener, GameModelListener {
     public void onGameFinished(GameResult result) {
         stopClientGameLoop();
 
-        SwingUtilities.invokeLater(() -> {
-            if (gameOverView == null) {
-                gameOverView = new GameOverView();
-                bindGameOverViewListeners();
-            }
+        if (gameView != null) {
+            gameView.clearShadowEffects();
+        }
 
-            boolean isWinner = (result != null && result.getWinnerPlayerId() == localPlayerId);
-            gameOverView.setScreenStrategy(isWinner ? new WinnerScreen() : new LoserScreen());
-            gameOverView.displayResult(result);
+        if (gameOverView != null && gameModel != null && gameView != null) {
+            int myId = (gameModel.getLocalPlayerId() != -1) ? gameModel.getLocalPlayerId() : this.localPlayerId;
+            int player1Id = gameView.getPlayer1Id();
+            String p1Nick = gameView.getPlayer1Nickname();
+            String p2Nick = gameView.getPlayer2Nickname();
+
+            gameOverView.displayResult(result, myId, player1Id, p1Nick, p2Nick);
             gameOverView.setVisible(true);
-        });
+        }
     }
 
     public void onClickRestart() {
@@ -101,12 +113,13 @@ public class GameController implements ActionListener, GameModelListener {
         }
         if (gameView != null) {
             gameView.clearInputField();
-            if (gameView.getConsoleLogPanel() != null) {
-                gameView.getConsoleLogPanel().clearConsoleLog();
-            }
+            gameView.clearConsoleLog();
+            gameView.clearShadowEffects();
         }
+
         if (serverConnection != null) {
-            serverConnection.sendRestartRequest();
+            GameRestartMessage message = new GameRestartMessage();
+            serverConnection.send(message);
         }
     }
 
@@ -116,34 +129,26 @@ public class GameController implements ActionListener, GameModelListener {
         if (gameOverView != null) {
             gameOverView.dispose();
         }
+
         if (serverConnection != null) {
-            serverConnection.sendMainMenuRequest();
+            serverConnection.disconnect();
         }
-        // TODO: 메인 프레임(CardLayout 등)을 메인(닉네임 입력) 화면으로 전환
     }
 
     public void startClientGameLoop() {
         stopClientGameLoop();
         isGameRunning = true;
 
+        if (gameView != null) {
+            gameView.clearInputField();
+        }
+
+        // 단어 좌표 계산은 서버가 담당하므로 클라이언트는 화면 갱신(렌더링)만 수행
         gameLoopTimer = new Timer(LOOP_INTERVAL_MS, e -> {
-            if (!isGameRunning || gameModel == null) {
+            if (!isGameRunning || gameView == null) {
                 return;
             }
-
-            List<ClientFallingWord> activeWords = gameModel.getActiveFallingWords();
-            if (activeWords != null) {
-                // 순회 중 서버 업데이트로 리스트가 변경되는 예외 방지를 위해 복사본 순회
-                for (ClientFallingWord word : new ArrayList<>(activeWords)) {
-                    if (word != null) {
-                        word.moveWord();
-                    }
-                }
-            }
-
-            if (gameView != null) {
-                gameView.onWordsUpdated(gameModel);
-            }
+            gameView.repaint();
         });
         gameLoopTimer.start();
     }
@@ -155,22 +160,31 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
+    public void onClickQuit() {
+        stopClientGameLoop();
+
+        if (serverConnection != null) {
+            GameQuitMessage message = new GameQuitMessage();
+            serverConnection.send(message);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e == null) {
             return;
         }
 
-        // 단어 입력창(JTextField)에서 엔터 입력 시
         if (e.getSource() instanceof JTextField) {
             if (gameView != null) {
                 String enteredWord = gameView.getEnteredWord();
-                onWordSubmitted(enteredWord);
+                double typingTime = gameView.consumeTypingTime();
+                gameView.clearInputField();
+                onWordSubmitted(enteredWord, typingTime);
             }
             return;
         }
 
-        // 버튼 이벤트가 actionPerformed로 직접 들어온 경우 처리
         String command = e.getActionCommand();
         if ("재시작".equals(command)) {
             onClickRestart();
@@ -185,7 +199,7 @@ public class GameController implements ActionListener, GameModelListener {
             return;
         }
 
-        // 둘 중 한 명의 HP가 0 이하가 되면 로컬 낙하 루프를 먼저 정지
+        // 둘 중 한 명의 HP가 0 이하가 되면 로컬 루프를 먼저 정지
         PlayerStateData p1 = model.getPlayer1state();
         PlayerStateData p2 = model.getPlayer2state();
         boolean anyDefeated =
@@ -196,6 +210,53 @@ public class GameController implements ActionListener, GameModelListener {
             stopClientGameLoop();
         }
     }
+    
+    private static final int DISCONNECT_REDIRECT_MS = 3000; // 3초
+
+    private Timer disconnectTimer;
+    private boolean isHandlingDisconnect = false;
+    private Runnable onReturnToLogin;
+
+    public void setOnReturnToLogin(Runnable onReturnToLogin) {
+        this.onReturnToLogin = onReturnToLogin;
+    }
+
+    public void onServerDisconnected() {
+        SwingUtilities.invokeLater(() -> {
+            if (isHandlingDisconnect) {
+                return;
+            }
+            isHandlingDisconnect = true;
+
+            stopClientGameLoop();
+
+            if (gameOverView != null) {
+                gameOverView.dispose();
+            }
+            if (gameView != null) {
+                gameView.clearShadowEffects();
+                gameView.showDisconnectedOverlay(true);
+            }
+
+            if (disconnectTimer != null && disconnectTimer.isRunning()) {
+                disconnectTimer.stop();
+            }
+
+            disconnectTimer = new Timer(DISCONNECT_REDIRECT_MS, e -> {
+                ((Timer) e.getSource()).stop();
+                isHandlingDisconnect = false;
+
+                if (gameView != null) {
+                    gameView.showDisconnectedOverlay(false);
+                }
+                if (onReturnToLogin != null) {
+                    onReturnToLogin.run();
+                }
+            });
+            disconnectTimer.setRepeats(false);
+            disconnectTimer.start();
+        });
+    }
 
     private void bindGameOverViewListeners() {
         if (gameOverView == null) {
@@ -204,4 +265,13 @@ public class GameController implements ActionListener, GameModelListener {
         gameOverView.setRestartButtonListener(e -> onClickRestart());
         gameOverView.setMainMenuButtonListener(e -> onClickMainMenu());
     }
+
+    public void onShadowEffectReceived(int targetPlayerId) {
+        if (!isGameRunning || gameView == null) {
+            return;
+        }
+        gameView.triggerShadowEffect(targetPlayerId);
+    }
+    
+    
 }

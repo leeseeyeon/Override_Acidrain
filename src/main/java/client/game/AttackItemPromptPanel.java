@@ -19,6 +19,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import common.message.game.AttackItemWord;
+
 public class AttackItemPromptPanel extends JPanel {
     private static final int PANEL_WIDTH = 180;
     private static final int PANEL_HEIGHT = 400;

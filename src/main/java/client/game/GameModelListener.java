@@ -12,4 +12,6 @@ public interface GameModelListener {
 	
 	//플레이어2 상태 업데이트
 	public default void onPlayer2StateUpdated(GameClientModel model) {}
+
+	public void onPlayerStateUpdated(GameClientModel model);
 }
