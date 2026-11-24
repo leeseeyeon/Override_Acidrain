@@ -68,7 +68,7 @@ public class WordManager {
         long spawnTime = System.currentTimeMillis();
 
         // 현재 낙하 속도에 따른 도착 시간
-        long duration = (long)(10000 / fallSpeed);
+        long duration = Math.round(10000f / fallSpeed);
         long reachBottomTime = spawnTime + duration;
 
         FallingWord word = new FallingWord(
