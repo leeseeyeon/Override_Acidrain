@@ -1,22 +1,21 @@
-package common.message.game;
+ppackage common.message.game;
 
 public class PlayerStateData {
 	private int playerId;
 	private String nickname;
 	private int currentHp;
-	private int maxHp = 100;
 	private double cpm;
 	private double accuracy;
 
-	//생성자
 	//PlayerState 기본 생성자
-	public PlayerStateData() {}
+	private PlayerStateData() {}
 	
-	//초기값을 업데이트하는 메소드
-	public PlayerStateData(int Id, String name) {
+	public PlayerStateData(int Id, String name, int currentHp, double cpm, double accuracy) {
 		this.playerId = Id;
 		this.nickname = name;
-		currentHp = maxHp;
+		this.currentHp = currentHp;
+		this.cpm = cpm;
+		this.accuracy = accuracy;
 	}
 	
 	//데이터를 한번에 업데이트 하는 메소드 
@@ -43,9 +42,5 @@ public class PlayerStateData {
 	public double Accuracy() {
 		return this.accuracy;
 	}
-	public int getMaxHp() {
-		return maxHp;
-	}
 }
-
 
