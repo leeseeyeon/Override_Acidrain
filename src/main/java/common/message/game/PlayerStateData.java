@@ -1,4 +1,4 @@
-package client.game;
+package common.message.game;
 
 public class PlayerStateData {
 	private int playerId;

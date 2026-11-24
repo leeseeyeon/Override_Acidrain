@@ -16,17 +16,31 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import common.message.game.AttackItemWord;
+import common.message.game.ClientFallingWord;
+import common.message.game.PlayerStateData;
 
 public class PlayerGameBoardPanel extends JPanel {
     private static final int BOARD_WIDTH = 350;
     private static final int BOARD_HEIGHT = 400;
+    private static final int SHADOW_DURATION_MS = 4500; // 4.5초
 
     private JLabel playerNameLabel;
     private JProgressBar hpGaugeBar;
     private List<ClientFallingWord> fallingWords;
     private JTextField wordInputField;
-    private boolean isShadowEffectActive;
+
+    private int id = -1;
+    private String nickname = "Player";
+    private long typingStartTimeMs = 0L;
+
+    private boolean isShadowEffectActive = false;
+    private Timer shadowTimer;
 
     /** @wbp.parser.constructor */
     public PlayerGameBoardPanel() {
@@ -69,9 +83,31 @@ public class PlayerGameBoardPanel extends JPanel {
         wordInputField = new JTextField();
         wordInputField.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
         wordInputField.setPreferredSize(new Dimension(0, 30));
+        initTypingTimer();
         bottomPanel.add(wordInputField, BorderLayout.CENTER);
 
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private void initTypingTimer() {
+        wordInputField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if (typingStartTimeMs == 0L && !wordInputField.getText().isEmpty()) {
+                    typingStartTimeMs = System.currentTimeMillis();
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                if (wordInputField.getText().isEmpty()) {
+                    typingStartTimeMs = 0L;
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+        });
     }
 
     public void updatePlayerStatus(PlayerStateData state) {
@@ -79,7 +115,10 @@ public class PlayerGameBoardPanel extends JPanel {
             return;
         }
 
+        this.id = state.getplayerId();
+
         if (state.getNickname() != null) {
+            this.nickname = state.getNickname();
             playerNameLabel.setText(state.getNickname());
         }
 
@@ -110,13 +149,22 @@ public class PlayerGameBoardPanel extends JPanel {
     }
 
     public String getEnteredWord() {
-        String word = wordInputField.getText().trim();
-        clearInputField();
-        return word;
+        return wordInputField.getText().trim();
+    }
+
+    // 입력 시작~제출까지의 경과 시간 반환 (초 단위, 서버가 ms 단위면 / 1000.0 제거)
+    public double consumeTypingTime() {
+        if (typingStartTimeMs == 0L) {
+            return 0.0;
+        }
+        long elapsedMs = System.currentTimeMillis() - typingStartTimeMs;
+        typingStartTimeMs = 0L;
+        return elapsedMs / 1000.0;
     }
 
     public void clearInputField() {
         wordInputField.setText("");
+        typingStartTimeMs = 0L;
     }
 
     public void setInputEditable(boolean editable) {
@@ -197,5 +245,45 @@ public class PlayerGameBoardPanel extends JPanel {
         }
 
         g2d.dispose();
+    }
+
+    public int getplayerId() {
+        return id;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    // 기본 4.5초 동안 Shadow 발동
+    public void triggerShadowEffect() {
+        triggerShadowEffect(SHADOW_DURATION_MS);
+    }
+
+    // 지정 시간(ms) 동안 Shadow 발동 (중복 피격 시 시간 초기화)
+    public void triggerShadowEffect(int durationMs) {
+        if (shadowTimer != null && shadowTimer.isRunning()) {
+            shadowTimer.stop();
+        }
+
+        isShadowEffectActive = true;
+        repaint();
+
+        shadowTimer = new Timer(durationMs, e -> {
+            isShadowEffectActive = false;
+            repaint();
+            ((Timer) e.getSource()).stop();
+        });
+        shadowTimer.setRepeats(false);
+        shadowTimer.start();
+    }
+
+    // 게임 종료·재시작 시 즉시 해제
+    public void clearShadowEffect() {
+        if (shadowTimer != null && shadowTimer.isRunning()) {
+            shadowTimer.stop();
+        }
+        isShadowEffectActive = false;
+        repaint();
     }
 }

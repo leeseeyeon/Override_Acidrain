@@ -10,13 +10,22 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import common.message.game.AttackItemWord;
+import common.message.game.ClientFallingWord;
+
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+
 public class GameView extends JPanel implements GameModelListener {
     private PlayerGameBoardPanel player1BoardPanel;
     private PlayerGameBoardPanel player2BoardPanel;
     private AttackItemPromptPanel centerItemPromptPanel;
     private GameConsoleLogPanel consoleLogPanel;
 
-    private int localPlayerId = 1; // 기본값: Player 1 기준
+    private int localPlayerId = -1;
     private ActionListener wordSubmitListener;
 
     /** @wbp.parser.constructor */
@@ -68,6 +77,7 @@ public class GameView extends JPanel implements GameModelListener {
 
         SwingUtilities.invokeLater(() -> {
             player1BoardPanel.updatePlayerStatus(model.getPlayer1state());
+            applyLocalPlayerInputState();
         });
     }
 
@@ -79,6 +89,7 @@ public class GameView extends JPanel implements GameModelListener {
 
         SwingUtilities.invokeLater(() -> {
             player2BoardPanel.updatePlayerStatus(model.getPlayer2state());
+            applyLocalPlayerInputState();
         });
     }
 
@@ -88,24 +99,10 @@ public class GameView extends JPanel implements GameModelListener {
             return;
         }
 
-        List<ClientFallingWord> allWords = model.getActiveFallingWords();
-        List<ClientFallingWord> normalWords = new ArrayList<>();
-        AttackItemWord centerItemWord = null;
-
-        if (allWords != null) {
-            for (ClientFallingWord word : allWords) {
-                if (word == null) {
-                    continue;
-                }
-                if (word instanceof AttackItemWord) {
-                    centerItemWord = (AttackItemWord) word;
-                } else {
-                    normalWords.add(word);
-                }
-            }
-        }
-
-        final AttackItemWord targetCenterItem = centerItemWord;
+        List<ClientFallingWord> normalWords = (model.getActiveFallingWords() != null)
+                ? new ArrayList<>(model.getActiveFallingWords())
+                : new ArrayList<>();
+        AttackItemWord centerItemWord = model.getCenterItemWord();
 
         SwingUtilities.invokeLater(() -> {
             if (player1BoardPanel != null) {
@@ -115,8 +112,8 @@ public class GameView extends JPanel implements GameModelListener {
                 player2BoardPanel.updateFallingWords(normalWords);
             }
             if (centerItemPromptPanel != null) {
-                if (targetCenterItem != null) {
-                    centerItemPromptPanel.updateFallingItem(targetCenterItem);
+                if (centerItemWord != null) {
+                    centerItemPromptPanel.updateFallingItem(centerItemWord);
                 } else {
                     centerItemPromptPanel.clearFallingItem();
                 }
@@ -126,24 +123,30 @@ public class GameView extends JPanel implements GameModelListener {
 
     public void setWordSubmitListener(ActionListener listener) {
         this.wordSubmitListener = listener;
-        PlayerGameBoardPanel localBoard = getLocalBoardPanel();
-        if (localBoard != null && listener != null) {
-            localBoard.addWordSubmitListener(listener);
+        if (listener == null) {
+            return;
+        }
+        if (player1BoardPanel != null) {
+            player1BoardPanel.addWordSubmitListener(listener);
+        }
+        if (player2BoardPanel != null) {
+            player2BoardPanel.addWordSubmitListener(listener);
         }
     }
 
     public void setLocalPlayerId(int playerId) {
-        this.localPlayerId = (playerId == 2) ? 2 : 1;
+        this.localPlayerId = playerId;
         applyLocalPlayerInputState();
-
-        if (wordSubmitListener != null) {
-            setWordSubmitListener(wordSubmitListener);
-        }
     }
 
     public String getEnteredWord() {
         PlayerGameBoardPanel localBoard = getLocalBoardPanel();
         return (localBoard != null) ? localBoard.getEnteredWord() : "";
+    }
+
+    public double consumeTypingTime() {
+        PlayerGameBoardPanel localBoard = getLocalBoardPanel();
+        return (localBoard != null) ? localBoard.consumeTypingTime() : 0.0;
     }
 
     public void clearInputField() {
@@ -170,15 +173,123 @@ public class GameView extends JPanel implements GameModelListener {
     }
 
     private PlayerGameBoardPanel getLocalBoardPanel() {
+        if (player1BoardPanel != null && player1BoardPanel.getplayerId() == localPlayerId) {
+            return player1BoardPanel;
+        }
+        if (player2BoardPanel != null && player2BoardPanel.getplayerId() == localPlayerId) {
+            return player2BoardPanel;
+        }
         return (localPlayerId == 2) ? player2BoardPanel : player1BoardPanel;
     }
 
     private void applyLocalPlayerInputState() {
+        boolean isP1Local = (player1BoardPanel != null && player1BoardPanel.getplayerId() != -1)
+                ? (player1BoardPanel.getplayerId() == localPlayerId)
+                : (localPlayerId == 1);
+        boolean isP2Local = (player2BoardPanel != null && player2BoardPanel.getplayerId() != -1)
+                ? (player2BoardPanel.getplayerId() == localPlayerId)
+                : (localPlayerId == 2);
+
         if (player1BoardPanel != null) {
-            player1BoardPanel.setInputEditable(localPlayerId == 1);
+            player1BoardPanel.setInputEditable(isP1Local);
         }
         if (player2BoardPanel != null) {
-            player2BoardPanel.setInputEditable(localPlayerId == 2);
+            player2BoardPanel.setInputEditable(isP2Local);
         }
+    }
+
+    public void clearConsoleLog() {
+        if (consoleLogPanel == null) {
+            return;
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            consoleLogPanel.clearConsoleLog();
+        });
+    }
+
+    public void clearShadowEffects() {
+        SwingUtilities.invokeLater(() -> {
+            if (player1BoardPanel != null) {
+                player1BoardPanel.clearShadowEffect();
+            }
+            if (player2BoardPanel != null) {
+                player2BoardPanel.clearShadowEffect();
+            }
+        });
+    }
+
+    public void triggerShadowEffect(int targetPlayerId) {
+        SwingUtilities.invokeLater(() -> {
+            if (player1BoardPanel != null && player1BoardPanel.getplayerId() == targetPlayerId) {
+                player1BoardPanel.triggerShadowEffect();
+            } else if (player2BoardPanel != null && player2BoardPanel.getplayerId() == targetPlayerId) {
+                player2BoardPanel.triggerShadowEffect();
+            }
+        });
+    }
+    
+    private boolean isServerDisconnected = false;
+
+    public void showDisconnectedOverlay(boolean show) {
+        SwingUtilities.invokeLater(() -> {
+            this.isServerDisconnected = show;
+            if (show) {
+                if (player1BoardPanel != null) {
+                    player1BoardPanel.setInputEditable(false);
+                }
+                if (player2BoardPanel != null) {
+                    player2BoardPanel.setInputEditable(false);
+                }
+            }
+            repaint();
+        });
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        if (isServerDisconnected) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+            // 화면 전체 어둡게 덮기
+            g2d.setColor(new Color(15, 23, 42, 200));
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+
+            // 큰 경고 문구
+            String title = "서버 연결 끊김";
+            g2d.setFont(new Font("맑은 고딕", Font.BOLD, 44));
+            g2d.setColor(new Color(248, 113, 113));
+            FontMetrics titleFm = g2d.getFontMetrics();
+            int titleX = (getWidth() - titleFm.stringWidth(title)) / 2;
+            int titleY = (getHeight() / 2) - 10;
+            g2d.drawString(title, titleX, titleY);
+
+            // 하단 안내 문구
+            String sub = "잠시 후 로그인 화면으로 이동합니다...";
+            g2d.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
+            g2d.setColor(new Color(226, 232, 240));
+            FontMetrics subFm = g2d.getFontMetrics();
+            int subX = (getWidth() - subFm.stringWidth(sub)) / 2;
+            int subY = titleY + 36;
+            g2d.drawString(sub, subX, subY);
+
+            g2d.dispose();
+        }
+    }
+
+    public int getPlayer1Id() {
+        return (player1BoardPanel != null) ? player1BoardPanel.getplayerId() : -1;
+    }
+
+    public String getPlayer1Nickname() {
+        return (player1BoardPanel != null) ? player1BoardPanel.getName() : "Player 1";
+    }
+
+    public String getPlayer2Nickname() {
+        return (player2BoardPanel != null) ? player2BoardPanel.getName() : "Player 2";
     }
 }
