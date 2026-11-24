@@ -1,5 +1,9 @@
 package server.room;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import common.message.ErrorCode;
@@ -11,11 +15,22 @@ import common.message.Theme;
 import common.message.game.PlayerProfile;
 import common.message.lobby.*;
 import common.message.game.*;
+import server.game.ServerGameManager;
+import server.game.player.Player;
+import server.game.word.WordRepository;
 import server.network.ClientHandler;
 
 public class GameRoom {
 	private static final AtomicInteger NEXT_GAME_ID = new AtomicInteger(1); // 모든 방이 공유하는 게임 번호
 	private static final AtomicInteger NEXT_PLAYER_ID = new AtomicInteger(1); // 고유한 playerId
+	private static final long TICK_MS = 50; // 게임 상태 갱신 주기
+
+	// 모든 방이 같이 쓰는 게임 타이머 (방마다 쓰레드 만들지 않게)
+	private static final ScheduledExecutorService TICKER = Executors.newSingleThreadScheduledExecutor(r -> {
+		Thread t = new Thread(r, "game-ticker");
+		t.setDaemon(true);
+		return t;
+	});
 	
     private final int id;
     private ClientHandler host;
@@ -24,9 +39,14 @@ public class GameRoom {
     private Theme theme = Theme.BASIC; // 방장이 안 고르면 기본 테마
     private RoomState state = RoomState.WAITING;
 
+    private final WordRepository wordRepository;
+    private ServerGameManager game;      // 게임 중일 때만 존재
+    private ScheduledFuture<?> tickTask; // 게임 중일 때만 존재
+
     
-    public GameRoom(int id) {
+    public GameRoom(int id, WordRepository wordRepository) {
         this.id = id;
+        this.wordRepository = wordRepository;
     }
 
     
@@ -97,12 +117,61 @@ public class GameRoom {
         int gameId = NEXT_GAME_ID.getAndIncrement();
         PlayerProfile p1 = new PlayerProfile(host.getPlayerId(), host.getNickname());
         PlayerProfile p2 = new PlayerProfile(guest.getPlayerId(), guest.getNickname());
+        broadcast(new GameStartMessage(gameId, theme, p1, p2));
 
-        // myPlayerId가 사람마다 달라서 broadcast 대신 따로 전송
-        host.send(new GameStartMessage(gameId, theme, p1, p2, 1));
-        guest.send(new GameStartMessage(gameId, theme, p1, p2, 2));
+        // 게임 로직 시작
+        game = new ServerGameManager(gameId,
+                new Player(host.getPlayerId(), host.getNickname()),
+                new Player(guest.getPlayerId(), guest.getNickname()),
+                theme, wordRepository);
+        game.startGame();
+        tickTask = TICKER.scheduleAtFixedRate(this::tick, TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
+    }
+    
+    
+    // 단어 입력 (게임 중에만)
+    public synchronized void submitWord(ClientHandler sender, String word, double typingTime) {
+        if (game == null) {
+            return;
+        }
+        // TODO (채원님 리뷰 반영 후): processInput(playerId, text, typingTime) 생기면 연결
+        // game.processInput(sender.getPlayerId(), word, typingTime);
+    }
+    
+    
+    // 게임 타이머가 TICK_MS마다 호출
+    private synchronized void tick() {
+        if (game == null) {
+            return; // 이미 끝난 게임
+        }
+        
+        try {
+            game.updateGame();
 
-        // TODO (게임 연동): 게임 로직 시작 (theme, p1, p2 전달)
+            if (game.checkGameOver()) {
+                broadcast(new GameFinishedMessage(game.getGameResult()));
+                stopGame();
+                return;
+            }
+
+            broadcast(GameStateMapper.toMessage(game)); // 두 클라이언트 같은 화면
+        } catch (Exception e) {
+            // 예외로 타이머가 조용히 죽지 않게 로그 남기고 게임 정리
+            e.printStackTrace();
+            stopGame();
+        }
+    }
+    
+    
+    // 게임 종료 정리: 타이머 끄고 대기실 상태로
+    private void stopGame() {
+        if (tickTask != null) {
+            tickTask.cancel(false);
+            tickTask = null;
+        }
+        game = null;
+        state = RoomState.WAITING;
+        guestReady = false;
     }
     
     
@@ -125,8 +194,7 @@ public class GameRoom {
             return;
         }
 
-        guestReady = false;
-        state = RoomState.WAITING;                  // TODO (게임 연동): 게임 중이었다면 게임 로직 정리
+        stopGame(); // 게임 중이었다면 타이머 끄고, 대기실 상태로
 
         if (host != null) { // 둘 다 나간 게 아닐 때
             host.send(SignalMessage.opponentLeft());
