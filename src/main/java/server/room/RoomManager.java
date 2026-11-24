@@ -12,7 +12,7 @@ public class RoomManager {
 
     private final List<GameRoom> rooms = new ArrayList<>();
     private int nextId = 1;
-    private final WordRepository wordRepository = new TestWordRepository(); // // TODO: 구현체 나오면 교체
+    private final WordRepository wordRepository = null; // // TODO: 구현체 나오면 교체
 
     private RoomManager() {}                    // 밖에서 new 금지
 
