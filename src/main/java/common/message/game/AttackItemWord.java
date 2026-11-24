@@ -1,16 +1,27 @@
 package common.message.game;
 
-public class AttackItemWord extends ClientFallingWord{
+public class AttackItemWord {
+	private String itemtype;
+    private String text;
+    private float y;
 
-	private String effectType;
-	
-	//공격 아이템 생성자
-	public AttackItemWord(int id, String text, String effect, float x, float y) {
-		super(id, text,x,y);
-		this.effectType = effect;
-	}
-	
-	public String getEffectType() {
-		return effectType;
-	}
+    private AttackItemWord() {}
+
+    public AttackItemWord(String itemtype, String text, float y) {
+        this.itemtype = itemtype;
+        this.text = text;
+        this.y = y;
+    }
+
+    public String getItemtype() {
+    	return itemtype;
+    }
+    
+    public String getText() {
+    	return text;
+    }
+    
+    public float getY() {
+    	return y;
+    }
 }
