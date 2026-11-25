@@ -11,6 +11,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,10 +22,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import common.message.game.AttackItemWord;
 import common.message.game.ClientFallingWord;
-import common.message.game.PlayerStateData;
-
 import common.message.game.PlayerStateData;
 
 public class PlayerGameBoardPanel extends JPanel {
@@ -212,22 +210,21 @@ public class PlayerGameBoardPanel extends JPanel {
                 int x = (int) word.getX();
                 int y = (int) word.getY();
 
-                boolean isAttackItem = (word instanceof AttackItemWord);
                 int padX = 8;
                 int padY = 4;
                 int boxWidth = fm.stringWidth(text) + padX * 2;
                 int boxHeight = fm.getHeight() + padY * 2;
 
                 // 단어 배경 박스
-                g2d.setColor(isAttackItem ? new Color(254, 226, 226) : Color.WHITE);
+                g2d.setColor(Color.WHITE);
                 g2d.fillRoundRect(x, y - fm.getAscent() - padY, boxWidth, boxHeight, 10, 10);
 
                 // 단어 테두리
-                g2d.setColor(isAttackItem ? new Color(220, 38, 38) : new Color(100, 116, 139));
+                g2d.setColor(new Color(100, 116, 139));
                 g2d.drawRoundRect(x, y - fm.getAscent() - padY, boxWidth, boxHeight, 10, 10);
 
                 // 단어 텍스트
-                g2d.setColor(isAttackItem ? new Color(185, 28, 28) : new Color(15, 23, 42));
+                g2d.setColor(new Color(15, 23, 42));
                 g2d.drawString(text, x + padX, y);
             }
         }

@@ -16,7 +16,8 @@ public class GameClientModel {
 	private int localPlayerId = -1;
 	private PlayerStateData Player1State; // ID가 작은 플레이어
 	private PlayerStateData Player2State; // ID가 큰 플레이어
-	private List<ClientFallingWord> activeFallingWords = new ArrayList<>();
+	private List<ClientFallingWord> player1FallingWords = new ArrayList<>();
+	private List<ClientFallingWord> player2FallingWords = new ArrayList<>();
 	private AttackItemWord centerItemWord;
 	private List<String> logs = new ArrayList<>();
 	private List<GameModelListener> listeners = new ArrayList<>();
@@ -74,8 +75,12 @@ public class GameClientModel {
 		}
 
 		// 떨어지는 일반 단어 목록 반영
-		if (update.getFallingWords() != null) {
-			this.activeFallingWords = new ArrayList<>(update.getFallingWords());
+		if (update.getPlayer1FallingWords() != null) {
+			this.player1FallingWords = new ArrayList<>(update.getPlayer1FallingWords());
+			wordsChanged = true;
+		}
+		if (update.getPlayer2FallingWords() != null) {
+			this.player2FallingWords = new ArrayList<>(update.getPlayer2FallingWords());
 			wordsChanged = true;
 		}
 
@@ -84,12 +89,6 @@ public class GameClientModel {
 		if (!Objects.equals(this.centerItemWord, newCenterWord)) {
 			this.centerItemWord = newCenterWord;
 			wordsChanged = true;
-			stateChanged = true;
-		}
-
-		// 로그 메시지 추가
-		if (update.getLogMessage() != null && !update.getLogMessage().isBlank()) {
-			this.logs.add(update.getLogMessage());
 			stateChanged = true;
 		}
 
@@ -189,8 +188,12 @@ public class GameClientModel {
 		return list;
 	}
 
-	public List<ClientFallingWord> getActiveFallingWords() {
-		return activeFallingWords;
+	public List<ClientFallingWord> getPlayer1FallingWords() {
+	    return player1FallingWords;
+	}
+
+	public List<ClientFallingWord> getPlayer2FallingWords() {
+	    return player2FallingWords;
 	}
 
 	public AttackItemWord getCenterItemWord() {

@@ -99,17 +99,20 @@ public class GameView extends JPanel implements GameModelListener {
             return;
         }
 
-        List<ClientFallingWord> normalWords = (model.getActiveFallingWords() != null)
-                ? new ArrayList<>(model.getActiveFallingWords())
+        List<ClientFallingWord> player1Words = (model.getPlayer1FallingWords() != null)
+                ? new ArrayList<>(model.getPlayer1FallingWords())
+                : new ArrayList<>();
+        List<ClientFallingWord> player2Words = (model.getPlayer2FallingWords() != null)
+                ? new ArrayList<>(model.getPlayer2FallingWords())
                 : new ArrayList<>();
         AttackItemWord centerItemWord = model.getCenterItemWord();
 
         SwingUtilities.invokeLater(() -> {
             if (player1BoardPanel != null) {
-                player1BoardPanel.updateFallingWords(normalWords);
+                player1BoardPanel.updateFallingWords(player1Words);
             }
             if (player2BoardPanel != null) {
-                player2BoardPanel.updateFallingWords(normalWords);
+                player2BoardPanel.updateFallingWords(player2Words);
             }
             if (centerItemPromptPanel != null) {
                 if (centerItemWord != null) {
@@ -286,10 +289,10 @@ public class GameView extends JPanel implements GameModelListener {
     }
 
     public String getPlayer1Nickname() {
-        return (player1BoardPanel != null) ? player1BoardPanel.getName() : "Player 1";
+        return player1BoardPanel.getNickname();
     }
 
     public String getPlayer2Nickname() {
-        return (player2BoardPanel != null) ? player2BoardPanel.getName() : "Player 2";
+        return player2BoardPanel.getNickname();
     }
 }

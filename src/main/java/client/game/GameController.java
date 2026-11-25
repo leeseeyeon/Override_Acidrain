@@ -12,6 +12,7 @@ import common.GameResult;
 import common.message.SignalMessage;
 import common.message.game.*;
 import javax.swing.SwingUtilities;
+import client.ui.*;
 
 public class GameController implements ActionListener, GameModelListener {
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS
@@ -20,6 +21,7 @@ public class GameController implements ActionListener, GameModelListener {
     private GameView gameView;
     private GameOverView gameOverView;
     private ServerConnection serverConnection;
+    private MainFrame mainFrame;
 
     private Timer gameLoopTimer;
     private int localPlayerId = -1;
@@ -127,10 +129,14 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearShadowEffects();
         }
 
-        if (serverConnection != null) {
-            GameRestartMessage message = new GameRestartMessage();
-            serverConnection.send(message);
+        //대기실 화면 전환
+        if (mainFrame != null) {
+            SwingUtilities.invokeLater(() -> mainFrame.showStartScreen());
         }
+    }
+    
+    public void setMainFrame(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
     }
 
     public void onClickMainMenu() {
