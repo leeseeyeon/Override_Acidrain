@@ -318,7 +318,7 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearShadowEffects();
         }
 
-        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 시작 화면으로 돌아갑니다.");
+        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 대기실로 돌아갑니다.");
 
         if (onReturnToLobby != null) {
             onReturnToLobby.run();
