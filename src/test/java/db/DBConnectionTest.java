@@ -1,4 +1,4 @@
-package server.db;
+package db;
 
 import server.game.word.DBWordRepository;
 import server.game.word.WordRepository;
