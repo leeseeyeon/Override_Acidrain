@@ -31,6 +31,7 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
+        	socket.setTcpNoDelay(true);   // 작은 메시지 모아 보내지 않고 바로 전송 (게임 상태 지연 줄이기)
             pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
 
             String request;
