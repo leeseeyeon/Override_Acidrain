@@ -24,6 +24,7 @@ public class GameRoom {
 	private static final AtomicInteger NEXT_GAME_ID = new AtomicInteger(1); // 모든 방이 공유하는 게임 번호
 	private static final AtomicInteger NEXT_PLAYER_ID = new AtomicInteger(1); // 고유한 playerId
 	private static final long TICK_MS = 50; // 게임 상태 갱신 주기
+	private static final long COUNTDOWN_MS = 3000; // 클라 GameStartCountdown(3초)과 맞춤
 
 	// 모든 방이 같이 쓰는 게임 타이머 (방마다 쓰레드 만들지 않게)
 	private static final ScheduledExecutorService TICKER = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -113,25 +114,35 @@ public class GameRoom {
         }
         
         int gameId = NEXT_GAME_ID.getAndIncrement();
-
-        // 게임 로직 먼저 생성 (DB 실패 시 GAME_START 보내지 않고 대기실 유지)
-        try {
-            game = new ServerGameManager(gameId,
-                    new Player(host.getPlayerId(), host.getNickname()),
-                    new Player(guest.getPlayerId(), guest.getNickname()),
-                    theme, wordRepository);
-            game.startGame();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            game = null;
-            return;
-        }
+        game = new ServerGameManager(gameId,
+                new Player(host.getPlayerId(), host.getNickname()),
+                new Player(guest.getPlayerId(), guest.getNickname()),
+                theme, wordRepository);
 
         state = RoomState.PLAYING;
         PlayerProfile p1 = new PlayerProfile(host.getPlayerId(), host.getNickname());
         PlayerProfile p2 = new PlayerProfile(guest.getPlayerId(), guest.getNickname());
         broadcast(new GameStartMessage(gameId, theme, p1, p2));
 
+        // 클라 카운트다운(3초)이 끝나는 시점에 게임 시작
+        tickTask = TICKER.schedule(this::beginGame, COUNTDOWN_MS, TimeUnit.MILLISECONDS);
+    }
+    
+    
+    // 카운트다운이 끝나면 TICKER 쓰레드에서 호출
+    private synchronized void beginGame() {
+        if (game == null) {
+            return; // 카운트다운 중에 누가 나가서 이미 정리됨
+        }
+        
+        try {
+            game.startGame(); // 여기서 DB 단어 불러옴
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            stopGame();
+            return;
+        }
+        
         tickTask = TICKER.scheduleAtFixedRate(this::tick, TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
     }
     
