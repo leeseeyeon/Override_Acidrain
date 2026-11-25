@@ -11,6 +11,7 @@ public class GameStateUpdateMessage extends Message {
     private List<ClientFallingWord> player2FallingWords; // Player 2 판 단어
 	private AttackItemWord attackItemWord;
 	private List<String> logMessage;
+	private LastClaimedItem lastClaimedItem; // 가장 최근 획득 아이템 (없으면 null)
 	
 	private GameStateUpdateMessage() {
 		super(MessageType.GAME_STATE_UPDATE);
@@ -18,12 +19,14 @@ public class GameStateUpdateMessage extends Message {
 	
 	public GameStateUpdateMessage(List<PlayerStateData> playerStatesDatas,
 			List<ClientFallingWord> player1FallingWords, List<ClientFallingWord> player2FallingWords,
-			AttackItemWord attackItemWord) {
+			AttackItemWord attackItemWord, List<String> logMessage, LastClaimedItem lastClaimedItem) {
 		this();
 		this.playerStatesDatas = playerStatesDatas;
 		this.player1FallingWords = player1FallingWords;
 		this.player2FallingWords = player2FallingWords;
 		this.attackItemWord = attackItemWord;
+		this.logMessage = logMessage;
+		this.lastClaimedItem = lastClaimedItem;
 	}
 	
 	public List<PlayerStateData> getPlayerStatesDatas() {
@@ -41,8 +44,13 @@ public class GameStateUpdateMessage extends Message {
 	public AttackItemWord getAttackItemWord() {
 		return attackItemWord;
 	}
+	
 	public List<String> getLogMessage() {
 	    return logMessage;
+	}
+	
+	public LastClaimedItem getLastClaimedItem() {
+		return lastClaimedItem;
 	}
 
 }

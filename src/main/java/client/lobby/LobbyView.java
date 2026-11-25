@@ -13,8 +13,9 @@ import common.message.*;
 public class LobbyView extends JPanel implements LobbyModelListener {
     //버튼 바활성화 상태(방장-"(Player2) 준비 중..."  게스트-"시작하길 기다리는 중...")
 	//해당 상태일 시 버튼 색상을 구분하기 위한 변수
-	private static final Color ACTION_BUTTON_ENABLED_COLOR = new Color(57, 135, 192);      // 누를 수 있을 때
-    private static final Color ACTION_BUTTON_DISABLED_COLOR = new Color(193, 193, 193);  // 누를 수 없을 때
+	private static final Color ACTION_BUTTON_ENABLED_COLOR = new Color(70, 99, 196);       // 누를 수 있을 때: 파랑
+    private static final Color ACTION_BUTTON_DISABLED_COLOR = new Color(212, 212, 212);  // 누를 수 없을 때: 연한 회색
+    private static final Color LOBBY_BACKGROUND_COLOR = new Color(226, 232, 240);        // 대기실 전체 배경: 연한 회청색
 	
 	private JLabel titleLabel;
     private PlayerCardPanel hostCardPanel;
@@ -27,7 +28,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
     private int shownChatMessageCount = 0;
 
     public LobbyView() {
-        setBackground(Color.WHITE);
+        setBackground(LOBBY_BACKGROUND_COLOR);
         setPreferredSize(new Dimension(1000, 760));
         setLayout(null);
 
@@ -38,7 +39,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         add(titleLabel);
 
         hostCardPanel = new PlayerCardPanel();
-        hostCardPanel.setSlotTitle("Player1");
+        hostCardPanel.setSlotTitle("방장");
         hostCardPanel.setBounds(40, 70, 220, 400);
         add(hostCardPanel);
 
@@ -47,7 +48,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         add(optionPanel);
 
         guestCardPanel = new PlayerCardPanel();
-        guestCardPanel.setSlotTitle("Player2");
+        guestCardPanel.setSlotTitle("게스트");
         guestCardPanel.setBounds(740, 70, 220, 400);
         add(guestCardPanel);
 
@@ -57,7 +58,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
 
         lobbyActionButton = new JButton("준비");   // 디자인 확인 용 기본 글자. 실행 중에는 Controller가 updateActionButton()으로 바꿈
         lobbyActionButton.setForeground(Color.WHITE);
-        lobbyActionButton.setBackground(new Color(57, 135, 192));
+        lobbyActionButton.setBackground(ACTION_BUTTON_ENABLED_COLOR);
         lobbyActionButton.setContentAreaFilled(false);   // 기본 버튼 모양 대신 직접 칠한 배경 사용 (윈도우 테마에서도 진한 색이 보이도록)
         lobbyActionButton.setOpaque(true);                // setContentAreaFilled 다음에 와야 함
         lobbyActionButton.setBorderPainted(false);
@@ -79,7 +80,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
 
     private void showHostCard(LobbyModel model) {
         hostCardPanel.setNickname(model.getHostNickname());
-        hostCardPanel.showStatusText(model.getHostNickname() == null ? "" : "방장");
+        hostCardPanel.showStatusText("");   // "방장"은 카드 제목 띠에 있어서 아래 칸은 비움
     }
 
     private void showGuestCard(LobbyModel model) {
@@ -87,7 +88,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         if (model.getGuestNickname() == null) {
             guestCardPanel.showStatusText("");
         } else if (!model.isLocalPlayerHost()) {
-            guestCardPanel.showStatusText("나");
+            guestCardPanel.showStatusText("");   // 참가자 화면: 준비 배지 없이 비움 ("게스트"는 카드 제목 띠에 있음)
         } else {
             guestCardPanel.showReadyBadge(model.isGuestReady());
         }
