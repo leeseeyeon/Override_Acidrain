@@ -8,11 +8,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.RenderingHints;
-import java.net.URL;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -28,9 +25,6 @@ public class AttackItemPromptPanel extends JPanel {
     private JLabel bulbIconLabel;
     private AttackItemWord fallingItemWord;
 
-    private ImageIcon activeBulbIcon;
-    private ImageIcon inactiveBulbIcon;
-
     /** @wbp.parser.constructor */
     public AttackItemPromptPanel() {
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
@@ -40,34 +34,18 @@ public class AttackItemPromptPanel extends JPanel {
         setBackground(new Color(248, 250, 252));
         setBorder(BorderFactory.createLineBorder(new Color(200, 208, 220), 2));
 
-        // 전구 이미지 리소스 로드 (이미지가 없으면 텍스트 배지로 대체)
-        activeBulbIcon = loadScaledIcon("/images/bulb_on.png", 28, 28);
-        inactiveBulbIcon = loadScaledIcon("/images/bulb_off.png", 28, 28);
-
-        // 상단: 전구 아이콘 및 아이템 타이틀 영역
+        // 상단: 아이템 타이틀 영역
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(new EmptyBorder(10, 8, 10, 8));
         topPanel.setBackground(new Color(235, 240, 248));
 
         bulbIconLabel = new JLabel("공격 아이템", SwingConstants.CENTER);
         bulbIconLabel.setFont(new Font("맑은 고딕", Font.BOLD, 13));
-        bulbIconLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-        bulbIconLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
-        bulbIconLabel.setIconTextGap(4);
         topPanel.add(bulbIconLabel, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);
 
         updateBulbVisual(false);
-    }
-
-    private ImageIcon loadScaledIcon(String resourcePath, int width, int height) {
-        URL imageUrl = getClass().getResource(resourcePath);
-        if (imageUrl == null) {
-            return null;
-        }
-        Image scaled = new ImageIcon(imageUrl).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaled);
     }
 
     private void updateBulbVisual(boolean active) {
@@ -76,14 +54,24 @@ public class AttackItemPromptPanel extends JPanel {
         }
 
         if (active) {
-            bulbIconLabel.setIcon(activeBulbIcon);
             bulbIconLabel.setText("공격 아이템 활성!");
             bulbIconLabel.setForeground(new Color(185, 28, 28));
         } else {
-            bulbIconLabel.setIcon(inactiveBulbIcon);
             bulbIconLabel.setText("공격 아이템");
             bulbIconLabel.setForeground(new Color(71, 85, 105));
         }
+    }
+
+    private String getItemEmoji(String type) {
+        if (type == null) {
+            return "";
+        }
+        return switch (type.toUpperCase()) {
+            case "BOMB" -> "💣";
+            case "HEAL" -> "❤️‍🩹";
+            case "SHADOW" -> "🕶️";
+            default -> "";
+        };
     }
 
     public void updateFallingItem(AttackItemWord item) {
@@ -123,7 +111,7 @@ public class AttackItemPromptPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        int topOffset = 58; // 상단 전구 라벨 영역 아래부터 렌더링
+        int topOffset = 58; // 상단 타이틀 영역 아래부터 렌더링
         int centerX = getWidth() / 2;
 
         // 중앙 가이드 라인
@@ -156,10 +144,10 @@ public class AttackItemPromptPanel extends JPanel {
         int boxWidth = Math.min(getWidth() - 16, fm.stringWidth(text) + padX * 2);
         int boxHeight = fm.getHeight() + padY * 2;
 
-        // 좁은 중앙 패널에서 잘리지 않도록 X는 가로 중앙 정렬, Y는 낙하 좌표 반영
+        // 좁은 중앙 패널에서 잘리지 않도록 X는 가로 중앙 정렬, Y는 낙하 좌표 반영 (위쪽 이모지 공간 확보)
         int boxX = (getWidth() - boxWidth) / 2;
         int rawY = (int) fallingItemWord.getY();
-        int minY = topOffset + 10;
+        int minY = topOffset + 28;
         int maxY = Math.max(minY, getHeight() - boxHeight - 10);
         int boxY = (rawY > 0) ? Math.max(minY, Math.min(rawY, maxY)) : (getHeight() + topOffset - boxHeight) / 2;
 
@@ -181,6 +169,17 @@ public class AttackItemPromptPanel extends JPanel {
         int textX = boxX + (boxWidth - fm.stringWidth(text)) / 2;
         int textY = boxY + ((boxHeight - fm.getHeight()) / 2) + fm.getAscent();
         g2d.drawString(text, textX, textY);
+
+        // 3. 박스 위 중앙에 아이템 이모지 렌더링
+        String emoji = getItemEmoji(fallingItemWord.getItemtype());
+        if (!emoji.isEmpty()) {
+            g2d.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+            g2d.setColor(new Color(30, 41, 59));
+            FontMetrics emojiFm = g2d.getFontMetrics();
+            int emojiX = boxX + (boxWidth - emojiFm.stringWidth(emoji)) / 2;
+            int emojiY = boxY - 6;
+            g2d.drawString(emoji, emojiX, emojiY);
+        }
 
         g2d.dispose();
     }
