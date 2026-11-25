@@ -26,7 +26,6 @@ public class GameController implements ActionListener, GameModelListener {
     private GameView gameView;
     private GameOverView gameOverView;
     private ServerConnection serverConnection;
-    private MainFrame mainFrame;
 
     private Timer gameLoopTimer;
     private int localPlayerId = -1;
@@ -106,18 +105,7 @@ public class GameController implements ActionListener, GameModelListener {
 
         // 모델 상태 반영 -> 등록된 GameModelListener(GameView, GameController)로 자동 통지
         gameModel.applyServerUpdate(update);
-        
-     // localPlayerId가 아직 설정되지 않았다면 닉네임으로 자동 매칭
-        if (this.localPlayerId == -1 && myNickname != null) {
-            PlayerStateData p1 = gameModel.getPlayer1state();
-            PlayerStateData p2 = gameModel.getPlayer2state();
 
-            if (p1 != null && myNickname.equals(p1.getNickname())) {
-                setLocalPlayerId(p1.getplayerId());
-            } else if (p2 != null && myNickname.equals(p2.getNickname())) {
-                setLocalPlayerId(p2.getplayerId());
-            }
-        }
     }
 
     public void onGameFinished(GameResult result) {
@@ -150,14 +138,16 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearShadowEffects();
         }
 
-        //대기실 화면 전환
-        if (mainFrame != null) {
-            SwingUtilities.invokeLater(() -> mainFrame.showLobbyScreen());
+      //대기실 화면 전환
+        if (onReturnToLobby != null) {
+            onReturnToLobby.run();
         }
     }
     
-    public void setMainFrame(MainFrame mainFrame) {
-        this.mainFrame = mainFrame;
+    private Runnable onReturnToLobby;
+
+    public void setOnReturnToLobby(Runnable onReturnToLobby) {
+        this.onReturnToLobby = onReturnToLobby;
     }
 
     public void onClickMainMenu() {
@@ -307,7 +297,7 @@ public class GameController implements ActionListener, GameModelListener {
             }
             case MessageType.GAME_FINISHED -> {
                 GameFinishedMessage finished = (GameFinishedMessage) message;
-                onGameFinished(finished.getResult()); // 실제 getter 이름이 getGameResult()라면 맞춰 수정
+                onGameFinished(finished.getResult());
             }
             case MessageType.OPPONENT_LEFT -> {
                 if (isGameRunning) {
@@ -328,10 +318,10 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearShadowEffects();
         }
 
-        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 시작 화면으로 돌아갑니다.");
+        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 대기실로 돌아갑니다.");
 
-        if (mainFrame != null) {
-            mainFrame.showStartScreen();
+        if (onReturnToLobby != null) {
+            onReturnToLobby.run();
         }
     }
 
@@ -350,12 +340,6 @@ public class GameController implements ActionListener, GameModelListener {
         }
         gameOverView.setRestartButtonListener(e -> onClickRestart());
         gameOverView.setMainMenuButtonListener(e -> onClickMainMenu());
-    }
-    
-    private String myNickname;
-
-    public void setMyNickname(String myNickname) {
-        this.myNickname = myNickname;
     }
 
     public void onShadowEffectReceived(int targetPlayerId) {
