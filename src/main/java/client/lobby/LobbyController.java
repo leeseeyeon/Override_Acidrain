@@ -59,7 +59,6 @@ public class LobbyController implements MessageListener, CountdownListener {
     /* enterLobby()와 달리 상대, 역할, 준비, 채팅을 초기화하지 않음 (게임 중에 받아 둔 방 상태를 그대로 유지) */
     public void returnToLobby() {
         isInLobby = true;
-        lobbyModel.updateGuestReady(false); // 서버는 게임 끝나면 READY 초기화함 → 맞추기
         lobbyModel.addChatMessage(ChatMessage.system("대기실로 돌아왔습니다."));
         refreshActionButton();
     }
@@ -194,6 +193,7 @@ public class LobbyController implements MessageListener, CountdownListener {
     private void handleGameStarted(GameStartMessage gameStartMessage) {
         pendingGameStart = gameStartMessage;
         myPlayerId = findMyPlayerId(gameStartMessage);
+        lobbyModel.updateGuestReady(false); // 서버는 이번 게임이 끝날 때 READY를 초기화함 → 게임 시작 시점에 미리 맞춤
         lobbyModel.setCountingDown(true);
         refreshActionButton();
         gameStartCountdown.start(this);
