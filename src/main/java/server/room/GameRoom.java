@@ -134,8 +134,7 @@ public class GameRoom {
         if (game == null) {
             return;
         }
-        // TODO (채원님 리뷰 반영 후): processInput(playerId, text, typingTime) 생기면 연결
-        // game.processInput(sender.getPlayerId(), word, typingTime);
+        game.processInput(sender.getPlayerId(), word, typingTime);
     }
     
     
