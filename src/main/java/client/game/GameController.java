@@ -160,6 +160,10 @@ public class GameController implements ActionListener, GameModelListener {
         if (serverConnection != null) {
             serverConnection.disconnect();
         }
+        
+        if (onReturnToLogin != null) {
+            onReturnToLogin.run();
+        } 
     }
 
     public void startClientGameLoop() {
