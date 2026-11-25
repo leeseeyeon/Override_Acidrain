@@ -76,10 +76,6 @@ public class GameConsoleLogPanel extends JPanel {
         }
 
         Runnable updateTask = () -> {
-            if (logs == null || logs.isEmpty()) {
-                logTextArea.setText("");
-                return;
-            }
             StringBuilder sb = new StringBuilder();
             for (String log : logs) {
                 if (log != null && !log.isBlank()) {
@@ -96,7 +92,11 @@ public class GameConsoleLogPanel extends JPanel {
             SwingUtilities.invokeLater(updateTask);
         }
     }
-    
+    /**
+     * TODO [프로토콜 연동 - 단건 로그 방식일 경우]:
+     * 서버가 이벤트 발생 시마다 로그 메시지를 1건씩 보내는 프로토콜로 확정되면
+     * GameController 수신부에서 이 메서드를 호출하고, 필요 시 타임스탬프/말머리 포맷을 맞춥니다.
+     */
     public void appendLog(String message) {
         appendLogMessage(message);
     }
