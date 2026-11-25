@@ -12,6 +12,7 @@ public class ItemManager {
     private ItemFactory itemFactory;
     private double spawnProbability;
     private GameSession session;
+    private Item lastClaimedItem;
     private final List<String> logMessages = new ArrayList<>();
 
     // 생성자
@@ -62,14 +63,15 @@ public class ItemManager {
 
                     // 아이템 효과 적용
                     item.applyEffect(user, opponent);
+                    // 획득한 아이템 정보 저장
+                    lastClaimedItem = item;
                     
                  // 아이템 사용 로그 생성
                     logMessages.add(
-                        "플레이어 " + playerId + "님이 "
-                        + item.getClass().getSimpleName()
-                        + " 아이템을 사용했습니다."
-                    );
-
+                    	    user.getNickname() + "님이 "
+                    	    + item.getType()
+                    	    + " 아이템을 사용했습니다."
+                    	);
                     // 획득한 아이템 제거
                     removeItem(item.getItemId());
 
@@ -108,6 +110,10 @@ public class ItemManager {
     public synchronized List<Item> getActiveItems() {
 
         return new ArrayList<>(activeItems);
+    }
+ // 최근 획득한 아이템 정보 반환
+    public synchronized Item getLastClaimedItem() {
+        return lastClaimedItem;
     }
     
  // 새로 생성된 아이템 로그 반환 및 초기화
