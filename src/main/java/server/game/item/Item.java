@@ -14,6 +14,7 @@ public class Item {
 	private float y; //y좌표
 	
 	
+	
 	public Item(int itemId, String word, ItemEffect effect, long spawnTime, long reachBottomTime, ItemType type) {
 		this.itemId = itemId;
 		this.word = word;
