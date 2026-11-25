@@ -13,8 +13,13 @@ import common.message.*;
 방장만 고를 수 있고, 참가자는 방장이 고른 테마를 보기만 함
  */
 public class OptionPanel extends JPanel {
-    private static final Color SELECTED_CARD_COLOR = new Color(91, 91, 91);
-    private static final Color UNSELECTED_CARD_COLOR = new Color(255, 255, 255);
+    private static final Color SELECTED_CARD_COLOR = new Color(30, 41, 59);         // 고른 테마: 진한 남색 바탕
+    private static final Color SELECTED_TEXT_COLOR = Color.WHITE;                   //            흰 글자
+    private static final Color UNSELECTED_CARD_COLOR = new Color(235, 240, 248);    // 안 고른 테마: 연한 파랑 바탕
+    private static final Color UNSELECTED_TEXT_COLOR = new Color(149, 149, 149);    //              회색 글자
+    private static final Color PANEL_BORDER_COLOR = new Color(200, 208, 220);       // 패널 테두리 (플레이어 카드와 같음)
+    private static final Color PANEL_BODY_COLOR = new Color(248, 250, 252);         // 패널 바탕
+    private static final Color HEADER_COLOR = new Color(235, 240, 248);             // 위쪽 제목 띠
     private static final String HOST_GUIDE_TEXT = "플레이할 단어 테마를 골라 주세요!";
     private static final String GUEST_GUIDE_TEXT = "방장이 단어 테마를 선택하고 있습니다";
 
@@ -29,20 +34,24 @@ public class OptionPanel extends JPanel {
     private boolean isEditable = false; //참가자인 경우 테마 선택 불가.
 
     public OptionPanel() {
-        setBackground(new Color(193, 193, 193));
+        setBackground(PANEL_BODY_COLOR);
+        setBorder(BorderFactory.createLineBorder(PANEL_BORDER_COLOR, 1));
         setPreferredSize(new Dimension(440, 400));
         setLayout(null);
 
-        titleLabel = new JLabel("옵션선택");
+        titleLabel = new JLabel("테마 선택");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 22));
-        titleLabel.setBounds(0, 26, 440, 36);
+        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
+        titleLabel.setOpaque(true);                 // 배경색을 칠해서 제목 띠로 사용
+        titleLabel.setBackground(HEADER_COLOR);
+        titleLabel.setBounds(1, 1, 438, 58);        // 테두리(1) 안쪽을 가로로 꽉 채움 (플레이어 카드 제목 띠와 같은 높이)
         add(titleLabel);
 
         guideLabel = new JLabel(GUEST_GUIDE_TEXT);
         guideLabel.setHorizontalAlignment(SwingConstants.CENTER);
         guideLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
-        guideLabel.setBounds(0, 68, 440, 22);
+        guideLabel.setForeground(new Color(100, 100, 100));
+        guideLabel.setBounds(0, 70, 440, 22);
         add(guideLabel);
 
         //ThemeCard1 : 기본 단어 테마.
@@ -119,8 +128,8 @@ public class OptionPanel extends JPanel {
             boolean isSelected = toTheme(themeCard) == selectedTheme;
             themeCard.setSelected(isSelected);
             themeCard.setBackground(isSelected ? SELECTED_CARD_COLOR : UNSELECTED_CARD_COLOR);
-            themeCard.setForeground(isSelected ? Color.WHITE : Color.DARK_GRAY);
-            themeCard.setBorder(BorderFactory.createLineBorder(isSelected ? SELECTED_CARD_COLOR : new Color(200, 190, 150)));
+            themeCard.setForeground(isSelected ? SELECTED_TEXT_COLOR : UNSELECTED_TEXT_COLOR);
+            themeCard.setBorder(BorderFactory.createLineBorder(isSelected ? SELECTED_CARD_COLOR : UNSELECTED_CARD_COLOR));
         }
     }
 
