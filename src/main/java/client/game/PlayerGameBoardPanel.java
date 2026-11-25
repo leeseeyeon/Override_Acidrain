@@ -29,8 +29,11 @@ import common.message.game.PlayerStateData;
 public class PlayerGameBoardPanel extends JPanel {
     private static final int BOARD_WIDTH = 350;
     private static final int BOARD_HEIGHT = 400;
+    private static final float SERVER_SCREEN_HEIGHT = 400.0f;
     private static final int SHADOW_DURATION_MS = 4500; // 4.5초
 
+    private JPanel topPanel;
+    private JPanel bottomPanel;
     private JLabel playerNameLabel;
     private JProgressBar hpGaugeBar;
     private List<ClientFallingWord> fallingWords;
@@ -56,7 +59,7 @@ public class PlayerGameBoardPanel extends JPanel {
         setBorder(BorderFactory.createLineBorder(new Color(200, 208, 220), 2));
 
         // 상단: 플레이어 닉네임 및 HP 게이지 영역
-        JPanel topPanel = new JPanel(new BorderLayout(0, 6));
+        topPanel = new JPanel(new BorderLayout(0, 6));
         topPanel.setBorder(new EmptyBorder(8, 10, 8, 10));
         topPanel.setBackground(new Color(235, 240, 248));
 
@@ -77,7 +80,7 @@ public class PlayerGameBoardPanel extends JPanel {
         add(topPanel, BorderLayout.NORTH);
 
         // 하단: 단어 입력 영역 (중앙은 비워두어 paintComponent에서 낙하 단어를 직접 그림)
-        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(new EmptyBorder(8, 10, 8, 10));
         bottomPanel.setBackground(new Color(235, 240, 248));
 
@@ -202,6 +205,15 @@ public class PlayerGameBoardPanel extends JPanel {
             g2d.setFont(new Font("맑은 고딕", Font.BOLD, 14));
             FontMetrics fm = g2d.getFontMetrics();
 
+            int topOffset = (topPanel != null && topPanel.getHeight() > 0) ? topPanel.getHeight() : 60;
+            int bottomOffset = (bottomPanel != null && bottomPanel.getHeight() > 0) ? bottomPanel.getHeight() : 46;
+            int padX = 8;
+            int padY = 4;
+
+            // 상단 상태바·하단 입력창을 제외한 실제 낙하 영역 계산
+            int minY = topOffset + fm.getAscent() + padY + 4;
+            int maxY = Math.max(minY, getHeight() - bottomOffset - fm.getDescent() - padY - 4);
+
             for (ClientFallingWord word : fallingWords) {
                 if (word == null || word.getText() == null) {
                     continue;
@@ -209,10 +221,11 @@ public class PlayerGameBoardPanel extends JPanel {
 
                 String text = word.getText();
                 int x = (int) word.getX();
-                int y = (int) word.getY();
 
-                int padX = 8;
-                int padY = 4;
+                // 서버 기준 높이(400) -> 실제 패널 낙하 영역으로 비례 변환
+                float yRatio = Math.max(0.0f, Math.min(1.0f, word.getY() / SERVER_SCREEN_HEIGHT));
+                int y = (int) (minY + yRatio * (maxY - minY));
+
                 int boxWidth = fm.stringWidth(text) + padX * 2;
                 int boxHeight = fm.getHeight() + padY * 2;
 

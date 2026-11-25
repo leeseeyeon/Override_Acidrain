@@ -21,8 +21,10 @@ import common.message.game.AttackItemWord;
 public class AttackItemPromptPanel extends JPanel {
     private static final int PANEL_WIDTH = 180;
     private static final int PANEL_HEIGHT = 400;
+    private static final float SERVER_SCREEN_HEIGHT = 400.0f;
 
-    private JLabel bulbIconLabel;
+    private JPanel topPanel;
+    private JLabel titleLabel;
     private AttackItemWord fallingItemWord;
 
     /** @wbp.parser.constructor */
@@ -35,30 +37,30 @@ public class AttackItemPromptPanel extends JPanel {
         setBorder(BorderFactory.createLineBorder(new Color(200, 208, 220), 2));
 
         // 상단: 아이템 타이틀 영역
-        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(new EmptyBorder(10, 8, 10, 8));
         topPanel.setBackground(new Color(235, 240, 248));
 
-        bulbIconLabel = new JLabel("공격 아이템", SwingConstants.CENTER);
-        bulbIconLabel.setFont(new Font("맑은 고딕", Font.BOLD, 13));
-        topPanel.add(bulbIconLabel, BorderLayout.CENTER);
+        titleLabel = new JLabel("아이템", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 13));
+        topPanel.add(titleLabel, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);
 
-        updateBulbVisual(false);
+        updateHeaderVisual(false);
     }
 
-    private void updateBulbVisual(boolean active) {
-        if (bulbIconLabel == null) {
+    private void updateHeaderVisual(boolean active) {
+        if (titleLabel == null) {
             return;
         }
 
         if (active) {
-            bulbIconLabel.setText("공격 아이템 활성!");
-            bulbIconLabel.setForeground(new Color(185, 28, 28));
+            titleLabel.setText("공격 아이템 활성!");
+            titleLabel.setForeground(new Color(185, 28, 28));
         } else {
-            bulbIconLabel.setText("공격 아이템");
-            bulbIconLabel.setForeground(new Color(71, 85, 105));
+            titleLabel.setText("공격 아이템");
+            titleLabel.setForeground(new Color(71, 85, 105));
         }
     }
 
@@ -66,7 +68,7 @@ public class AttackItemPromptPanel extends JPanel {
         if (type == null) {
             return "";
         }
-        return switch (type.toUpperCase()) {
+        return switch (type.trim().toUpperCase()) {
             case "BOMB" -> "💣";
             case "HEAL" -> "❤️‍🩹";
             case "SHADOW" -> "🕶️";
@@ -78,7 +80,7 @@ public class AttackItemPromptPanel extends JPanel {
         Runnable updateTask = () -> {
             this.fallingItemWord = item;
             boolean hasItem = (item != null && item.getText() != null && !item.getText().isBlank());
-            updateBulbVisual(hasItem);
+            updateHeaderVisual(hasItem);
             repaint();
         };
 
@@ -92,7 +94,7 @@ public class AttackItemPromptPanel extends JPanel {
     public void clearFallingItem() {
         Runnable clearTask = () -> {
             this.fallingItemWord = null;
-            updateBulbVisual(false);
+            updateHeaderVisual(false);
             repaint();
         };
 
@@ -111,7 +113,7 @@ public class AttackItemPromptPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        int topOffset = 58; // 상단 타이틀 영역 아래부터 렌더링
+        int topOffset = (topPanel != null && topPanel.getHeight() > 0) ? topPanel.getHeight() : 42;
         int centerX = getWidth() / 2;
 
         // 중앙 가이드 라인
@@ -144,12 +146,12 @@ public class AttackItemPromptPanel extends JPanel {
         int boxWidth = Math.min(getWidth() - 16, fm.stringWidth(text) + padX * 2);
         int boxHeight = fm.getHeight() + padY * 2;
 
-        // 좁은 중앙 패널에서 잘리지 않도록 X는 가로 중앙 정렬, Y는 낙하 좌표 반영 (위쪽 이모지 공간 확보)
+        // 좁은 중앙 패널에서 잘리지 않도록 X는 가로 중앙 정렬, Y는 서버 기준 높이(400) -> 실제 낙하 영역으로 비례 변환
         int boxX = (getWidth() - boxWidth) / 2;
-        int rawY = (int) fallingItemWord.getY();
-        int minY = topOffset + 28;
+        int minY = topOffset + 28; // 위쪽 이모지 공간 확보
         int maxY = Math.max(minY, getHeight() - boxHeight - 10);
-        int boxY = (rawY > 0) ? Math.max(minY, Math.min(rawY, maxY)) : (getHeight() + topOffset - boxHeight) / 2;
+        float yRatio = Math.max(0.0f, Math.min(1.0f, fallingItemWord.getY() / SERVER_SCREEN_HEIGHT));
+        int boxY = (int) (minY + yRatio * (maxY - minY));
 
         // 외곽 강조 빛 효과
         g2d.setColor(new Color(254, 202, 202, 160));

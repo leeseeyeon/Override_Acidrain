@@ -132,6 +132,13 @@ public class GameController implements ActionListener, GameModelListener {
     }
 
     /**
+     * 서버의 ItemType enum을 그대로 전달받을 수 있는 오버로딩 메서드
+     */
+    public void handleLastClaimedItem(String itemId, Enum<?> itemType, int claimedBy) {
+        handleLastClaimedItem(itemId, itemType != null ? itemType.name() : null, claimedBy);
+    }
+
+    /**
      * 최근 획득된 아이템 정보를 처리합니다.
      * 동일한 itemId에 대해서는 효과가 중복 적용되지 않습니다.
      */
