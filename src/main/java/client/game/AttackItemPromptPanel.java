@@ -56,10 +56,10 @@ public class AttackItemPromptPanel extends JPanel {
         }
 
         if (active) {
-            titleLabel.setText("공격 아이템 활성!");
+            titleLabel.setText("아이템 활성!");
             titleLabel.setForeground(new Color(185, 28, 28));
         } else {
-            titleLabel.setText("공격 아이템");
+            titleLabel.setText("아이템");
             titleLabel.setForeground(new Color(71, 85, 105));
         }
     }
@@ -146,12 +146,9 @@ public class AttackItemPromptPanel extends JPanel {
         int boxWidth = Math.min(getWidth() - 16, fm.stringWidth(text) + padX * 2);
         int boxHeight = fm.getHeight() + padY * 2;
 
-        // 좁은 중앙 패널에서 잘리지 않도록 X는 가로 중앙 정렬, Y는 서버 기준 높이(400) -> 실제 낙하 영역으로 비례 변환
+        // X는 가로 중앙 정렬, Y는 서버 기준 높이(400) -> 실제 패널 높이에 맞게 비례 변환
         int boxX = (getWidth() - boxWidth) / 2;
-        int minY = topOffset + 28; // 위쪽 이모지 공간 확보
-        int maxY = Math.max(minY, getHeight() - boxHeight - 10);
-        float yRatio = Math.max(0.0f, Math.min(1.0f, fallingItemWord.getY() / SERVER_SCREEN_HEIGHT));
-        int boxY = (int) (minY + yRatio * (maxY - minY));
+        int boxY = (int) ((fallingItemWord.getY() / SERVER_SCREEN_HEIGHT) * getHeight());
 
         // 외곽 강조 빛 효과
         g2d.setColor(new Color(254, 202, 202, 160));
