@@ -12,6 +12,7 @@ import server.game.item.Item;
 import server.game.player.Player;
 import server.game.player.TypingStats;
 import server.game.word.FallingWord;
+import common.message.game.LastClaimedItem;
 
 // 게임 로직 상태 → GAME_STATE_UPDATE 메시지로 변환 (게임 로직은 메시지 형식을 몰라도 되게)
 final class GameStateMapper {
@@ -27,7 +28,9 @@ final class GameStateMapper {
                 List.of(toPlayerState(p1), toPlayerState(p2)),
                 toClientWords(game, p1),
                 toClientWords(game, p2),
-                toAttackItem(game)); // TODO (채원님 리뷰 반영 후): 아이템 정보 생기면 AttackItemWord 채우기
+                toAttackItem(game),
+                game.getLogMessage(),
+                toLastClaimedItem(game));
     }
 
     private static PlayerStateData toPlayerState(Player p) {
@@ -44,6 +47,15 @@ final class GameStateMapper {
             }
         }
         return null;
+    }
+    
+    // 가장 최근 획득 아이템 (아직 아무도 안 먹었으면 null)
+    private static LastClaimedItem toLastClaimedItem(ServerGameManager game) {
+        Item item = game.getItemManager().getLastClaimedItem();
+        if (item == null || item.getClaimedBy() == null) {
+            return null;
+        }
+        return new LastClaimedItem(item.getItemId(), item.getType(), item.getClaimedBy());
     }
 
     private static List<ClientFallingWord> toClientWords(ServerGameManager game, Player p) {
