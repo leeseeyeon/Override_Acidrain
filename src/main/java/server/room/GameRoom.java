@@ -112,19 +112,26 @@ public class GameRoom {
             return; // 시작 조건이 아니면 조용히 무시
         }
         
-        state = RoomState.PLAYING;
-
         int gameId = NEXT_GAME_ID.getAndIncrement();
+
+        // 게임 로직 먼저 생성 (DB 실패 시 GAME_START 보내지 않고 대기실 유지)
+        try {
+            game = new ServerGameManager(gameId,
+                    new Player(host.getPlayerId(), host.getNickname()),
+                    new Player(guest.getPlayerId(), guest.getNickname()),
+                    theme, wordRepository);
+            game.startGame();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            game = null;
+            return;
+        }
+
+        state = RoomState.PLAYING;
         PlayerProfile p1 = new PlayerProfile(host.getPlayerId(), host.getNickname());
         PlayerProfile p2 = new PlayerProfile(guest.getPlayerId(), guest.getNickname());
         broadcast(new GameStartMessage(gameId, theme, p1, p2));
 
-        // 게임 로직 시작
-        game = new ServerGameManager(gameId,
-                new Player(host.getPlayerId(), host.getNickname()),
-                new Player(guest.getPlayerId(), guest.getNickname()),
-                theme, wordRepository);
-        game.startGame();
         tickTask = TICKER.scheduleAtFixedRate(this::tick, TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
     }
     
