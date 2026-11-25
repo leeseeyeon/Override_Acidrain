@@ -9,6 +9,7 @@ import javax.swing.*;
  */
 public class PlayerCardPanel extends JPanel {
     private static final String EMPTY_SLOT_TEXT = "입장 대기 중…";
+    private static final int NICKNAME_WIDTH = 200;   // nicknameLabel 너비와 같게 (이름이 길면 이 너비에서 아래 줄로 넘김)
     
     private static final Color READY_BADGE_COLOR = new Color(91, 91, 91); // 준비 완료!: 진한 회색
     private static final Color NOT_READY_BADGE_COLOR = new Color(193,193,193); // 준비 중...: 연한 회색
@@ -32,7 +33,7 @@ public class PlayerCardPanel extends JPanel {
         nicknameLabel = new JLabel(EMPTY_SLOT_TEXT);
         nicknameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         nicknameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 28));
-        nicknameLabel.setBounds(10, 170, 200, 44);
+        nicknameLabel.setBounds(10, 150, 200, 84);   // 두 줄이 들어가는 높이
         add(nicknameLabel);
 
         statusLabel = new JLabel(" ");
@@ -49,9 +50,10 @@ public class PlayerCardPanel extends JPanel {
         slotTitleLabel.setText(slotTitle);
     }
 
-    /** null이면 빈 자리로 표시 */
+    /** null이면 빈 자리로 표시. 이름이 길면 아래 줄로 넘김 (HTML + 너비 지정) */
     public void setNickname(String nickname) {
-        nicknameLabel.setText(nickname == null ? EMPTY_SLOT_TEXT : nickname);
+        String text = (nickname == null) ? EMPTY_SLOT_TEXT : nickname;
+        nicknameLabel.setText("<html><div style='text-align:center; width:" + NICKNAME_WIDTH + "px'>" + text + "</div></html>");
     }
 
     /** "방장", "나"처럼 배경 없는 글자로 표시 (빈 문자열이면 아래 칸이 비어 보임) */
