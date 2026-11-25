@@ -60,10 +60,10 @@ public class MainFrame extends JFrame implements ScreenNavigator {
         GameView gameView = new GameView();
         gameController = new GameController(gameModel, gameView, serverConnection);
         gameController.setGameOverView(new GameOverView());         // 결과 창 (별도 JFrame, 게임이 끝나면 GameController가 띄움)
-        gameController.setOnReturnToLogin(this::showStartScreen);   // 게임 중 연결 끊김 → 3초 뒤 시작 화면
-        // TODO(채영님): GameController에 setOnReturnToLobby(Runnable) 구현 후 아래 주석 해제
-        // 게임 중 상대가 퇴장할 경우 → 기존 대기실로 복귀 (방 상태 유지) 
-        // gameController.setOnReturnToLobby(this::returnToLobbyScreen);
+        gameController.setOnReturnToLogin(this::showStartScreen);   // 게임 중 내 연결 끊김, 게임 중 상대 퇴장(연결 끊고), 결과 화면 "메인 화면" → 시작 화면
+        // TODO(채영님): GameController에 setOnReturnToLobby(Runnable) 구현해주세요
+        //    결과 화면 "재시작" → 같은 방 대기실로 복귀 (방 상태 유지)
+        gameController.setOnReturnToLobby(this::returnToLobbyScreen);
 
         // 5. 서버 메시지 리스너 등록 (connect() 전에)
         serverConnection.addListener(startController);
