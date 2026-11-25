@@ -3,10 +3,12 @@ package server.room;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.message.game.AttackItemWord;
 import common.message.game.ClientFallingWord;
 import common.message.game.GameStateUpdateMessage;
 import common.message.game.PlayerStateData;
 import server.game.ServerGameManager;
+import server.game.item.Item;
 import server.game.player.Player;
 import server.game.player.TypingStats;
 import server.game.word.FallingWord;
@@ -25,13 +27,23 @@ final class GameStateMapper {
                 List.of(toPlayerState(p1), toPlayerState(p2)),
                 toClientWords(game, p1),
                 toClientWords(game, p2),
-                null); // TODO (채원님 리뷰 반영 후): 아이템 정보 생기면 AttackItemWord 채우기
+                toAttackItem(game)); // TODO (채원님 리뷰 반영 후): 아이템 정보 생기면 AttackItemWord 채우기
     }
 
     private static PlayerStateData toPlayerState(Player p) {
         TypingStats stats = p.getTypingStats();
         return new PlayerStateData(p.getPlayerId(), p.getNickname(), p.getHP(),
                 stats.calculateCPM(), stats.calculateAccuracy());
+    }
+    
+    // 화면 가운데 공통 제시어: 아직 아무도 못 먹은 아이템 하나 (없으면 null)
+    private static AttackItemWord toAttackItem(ServerGameManager game) {
+        for (Item item : game.getItemManager().getActiveItems()) {
+            if (item.isActive()) {
+                return new AttackItemWord(item.getType().name(), item.getWord(), item.getY());
+            }
+        }
+        return null;
     }
 
     private static List<ClientFallingWord> toClientWords(ServerGameManager game, Player p) {

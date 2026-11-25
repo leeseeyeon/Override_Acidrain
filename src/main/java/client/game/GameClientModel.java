@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import common.message.game.AttackItemWord;
 import common.message.game.ClientFallingWord;
+import common.message.game.GameStateUpdateMessage;
 import common.message.game.PlayerStateData;
 
 import common.message.game.PlayerStateData;
@@ -21,7 +22,7 @@ public class GameClientModel {
 	private List<GameModelListener> listeners = new ArrayList<>();
 
 	// 상황별 게임 상태 업데이트
-	public void applyServerUpdate(Game_State_Update update) {
+	public void applyServerUpdate(GameStateUpdateMessage update) {
 		if (update == null) {
 			return;
 		}
@@ -33,9 +34,9 @@ public class GameClientModel {
 		boolean stateChanged = false;
 
 		// player1(작은 ID), player2(큰 ID) 상태 업데이트
-		if (update.getPlayerStates() != null && !update.getPlayerStates().isEmpty()) {
+		if (update.getPlayerStatesDatas() != null && !update.getPlayerStatesDatas().isEmpty()) {
 			List<PlayerStateData> validStates = new ArrayList<>();
-			for (PlayerStateData state : update.getPlayerStates()) {
+			for (PlayerStateData state : update.getPlayerStatesDatas()) {
 				if (state != null) {
 					validStates.add(state);
 				}
@@ -79,7 +80,7 @@ public class GameClientModel {
 		}
 
 		// 중앙 제시 아이템 단어 반영 (null이 전달되면 아이템 제거로 처리)
-		AttackItemWord newCenterWord = update.getCenterPromptWord();
+		AttackItemWord newCenterWord = update.getAttackItemWord();
 		if (!Objects.equals(this.centerItemWord, newCenterWord)) {
 			this.centerItemWord = newCenterWord;
 			wordsChanged = true;

@@ -6,8 +6,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
+import client.network.MessageListener;
 import client.network.ServerConnection;
 import common.GameResult;
+import common.message.SignalMessage;
 import common.message.game.*;
 import javax.swing.SwingUtilities;
 
@@ -43,7 +45,15 @@ public class GameController implements ActionListener, GameModelListener {
         
      // 서버 연결 끊김 감지 시 3초 오버레이 후 StartView로 복귀
         if (this.serverConnection != null) {
-            this.serverConnection.setOnDisconnectedListener(() -> onServerDisconnected());
+        	this.serverConnection.addListener(new MessageListener() {
+        	    @Override
+        	    public void update(String msg) {}
+
+        	    @Override
+        	    public void onDisconnected() {
+        	        onServerDisconnected();
+        	    }
+        	});
         }
     }
 
@@ -78,7 +88,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
-    public void onGameStateReceived(Game_State_Update update) {
+    public void onGameStateReceived(GameStateUpdateMessage update) {
         if (update == null || gameModel == null) {
             return;
         }
@@ -164,8 +174,7 @@ public class GameController implements ActionListener, GameModelListener {
         stopClientGameLoop();
 
         if (serverConnection != null) {
-            GameQuitMessage message = new GameQuitMessage();
-            serverConnection.send(message);
+        	serverConnection.send(SignalMessage.gameQuit());
         }
     }
 

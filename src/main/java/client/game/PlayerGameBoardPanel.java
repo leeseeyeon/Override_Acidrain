@@ -124,7 +124,7 @@ public class PlayerGameBoardPanel extends JPanel {
             playerNameLabel.setText(state.getNickname());
         }
 
-        int maxHp = state.getMaxHp() > 0 ? state.getMaxHp() : 100;
+        int maxHp = 100;
         int currentHp = Math.max(0, Math.min(state.getCurrentHp(), maxHp));
 
         hpGaugeBar.setMaximum(maxHp);
