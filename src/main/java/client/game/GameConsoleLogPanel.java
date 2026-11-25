@@ -96,6 +96,10 @@ public class GameConsoleLogPanel extends JPanel {
             SwingUtilities.invokeLater(updateTask);
         }
     }
+    
+    public void appendLog(String message) {
+        appendLogMessage(message);
+    }
 
     public void clearConsoleLog() {
         if (logTextArea == null) {

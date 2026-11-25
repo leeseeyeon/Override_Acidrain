@@ -3,15 +3,21 @@ package client.game;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.Timer;
+
 
 import client.network.MessageListener;
 import client.network.ServerConnection;
 import common.GameResult;
+import common.message.JsonUtil;
+import common.message.Message;
+import common.message.MessageType;
 import common.message.SignalMessage;
 import common.message.game.*;
 import javax.swing.SwingUtilities;
+import client.ui.*;
 
 public class GameController implements ActionListener, GameModelListener {
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS
@@ -20,6 +26,7 @@ public class GameController implements ActionListener, GameModelListener {
     private GameView gameView;
     private GameOverView gameOverView;
     private ServerConnection serverConnection;
+    private MainFrame mainFrame;
 
     private Timer gameLoopTimer;
     private int localPlayerId = -1;
@@ -45,15 +52,19 @@ public class GameController implements ActionListener, GameModelListener {
         
      // 서버 연결 끊김 감지 시 3초 오버레이 후 StartView로 복귀
         if (this.serverConnection != null) {
-        	this.serverConnection.addListener(new MessageListener() {
-        	    @Override
-        	    public void update(String msg) {}
+            this.serverConnection.addListener(new MessageListener() {
+                @Override
+                public void update(String json) {
+                    SwingUtilities.invokeLater(() -> handleServerMessage(json));
+                }
 
-        	    @Override
-        	    public void onDisconnected() {
-        	        onServerDisconnected();
-        	    }
-        	});
+                @Override
+                public void onDisconnected() {
+                    if (isGameRunning) {
+                        onServerDisconnected();
+                    }
+                }
+            });
         }
     }
 
@@ -95,6 +106,18 @@ public class GameController implements ActionListener, GameModelListener {
 
         // 모델 상태 반영 -> 등록된 GameModelListener(GameView, GameController)로 자동 통지
         gameModel.applyServerUpdate(update);
+        
+     // localPlayerId가 아직 설정되지 않았다면 닉네임으로 자동 매칭
+        if (this.localPlayerId == -1 && myNickname != null) {
+            PlayerStateData p1 = gameModel.getPlayer1state();
+            PlayerStateData p2 = gameModel.getPlayer2state();
+
+            if (p1 != null && myNickname.equals(p1.getNickname())) {
+                setLocalPlayerId(p1.getplayerId());
+            } else if (p2 != null && myNickname.equals(p2.getNickname())) {
+                setLocalPlayerId(p2.getplayerId());
+            }
+        }
     }
 
     public void onGameFinished(GameResult result) {
@@ -127,10 +150,14 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearShadowEffects();
         }
 
-        if (serverConnection != null) {
-            GameRestartMessage message = new GameRestartMessage();
-            serverConnection.send(message);
+        //대기실 화면 전환
+        if (mainFrame != null) {
+            SwingUtilities.invokeLater(() -> mainFrame.showLobbyScreen());
         }
+    }
+    
+    public void setMainFrame(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
     }
 
     public void onClickMainMenu() {
@@ -267,12 +294,68 @@ public class GameController implements ActionListener, GameModelListener {
         });
     }
 
+    private void handleServerMessage(String json) {
+        Message message = decodeOrNull(json);
+        if (message == null) {
+            return;
+        }
+
+        switch (message.getType()) {
+            case MessageType.GAME_STATE_UPDATE -> {
+                GameStateUpdateMessage update = (GameStateUpdateMessage) message;
+                onGameStateReceived(update);
+            }
+            case MessageType.GAME_FINISHED -> {
+                GameFinishedMessage finished = (GameFinishedMessage) message;
+                onGameFinished(finished.getResult()); // 실제 getter 이름이 getGameResult()라면 맞춰 수정
+            }
+            case MessageType.OPPONENT_LEFT -> {
+                if (isGameRunning) {
+                    onOpponentLeft();
+                }
+            }
+            default -> { /* 게임과 무관한 메시지는 무시 */ }
+        }
+    }
+
+    public void onOpponentLeft() {
+        stopClientGameLoop();
+
+        if (gameOverView != null) {
+            gameOverView.dispose();
+        }
+        if (gameView != null) {
+            gameView.clearShadowEffects();
+        }
+
+        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 시작 화면으로 돌아갑니다.");
+
+        if (mainFrame != null) {
+            mainFrame.showStartScreen();
+        }
+    }
+
+    private Message decodeOrNull(String json) {
+        try {
+            return JsonUtil.decode(json);
+        } catch (RuntimeException e) {
+            System.err.println("[GameController] 해석할 수 없는 메시지: " + json);
+            return null;
+        }
+    }
+    
     private void bindGameOverViewListeners() {
         if (gameOverView == null) {
             return;
         }
         gameOverView.setRestartButtonListener(e -> onClickRestart());
         gameOverView.setMainMenuButtonListener(e -> onClickMainMenu());
+    }
+    
+    private String myNickname;
+
+    public void setMyNickname(String myNickname) {
+        this.myNickname = myNickname;
     }
 
     public void onShadowEffectReceived(int targetPlayerId) {
