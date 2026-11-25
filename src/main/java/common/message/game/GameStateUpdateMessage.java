@@ -10,7 +10,8 @@ public class GameStateUpdateMessage extends Message {
     private List<ClientFallingWord> player1FallingWords; // Player 1 판 단어
     private List<ClientFallingWord> player2FallingWords; // Player 2 판 단어
 	private AttackItemWord attackItemWord;
-    
+	private List<String> logMessage;
+	
 	private GameStateUpdateMessage() {
 		super(MessageType.GAME_STATE_UPDATE);
 	}
@@ -39,6 +40,9 @@ public class GameStateUpdateMessage extends Message {
 
 	public AttackItemWord getAttackItemWord() {
 		return attackItemWord;
+	}
+	public List<String> getLogMessage() {
+	    return logMessage;
 	}
 
 }

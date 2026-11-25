@@ -18,10 +18,14 @@ public class WordManager {
     // 게임 화면 좌표
     private static final float SCREEN_WIDTH = 300f;
     public static final float SCREEN_HEIGHT =400f;
+    
+    // 단어 잘림 방지를 위한 설정값
+    private static final float CHAR_WIDTH = 15f;
+    private static final float MARGIN = 10f;
 
     // 단계별 바닥 도달 시간 (밀리초)
     private static final long[] FALL_DURATIONS = {
-        10000L, 8000L, 6500L, 5000L, 4000L
+    		8000L, 6500L, 5000L, 4000L, 3000L
     };
 
 
@@ -60,8 +64,14 @@ public class WordManager {
         // 단어 ID 생성
         int wordId = nextWordId++;
 
+     // 단어 길이에 따른 예상 너비 계산
+        float wordWidth = text.length() * CHAR_WIDTH;
+
+        // 단어 잘림 방지를 위한 최대 x좌표 계산
+        float maxX = Math.max(MARGIN, SCREEN_WIDTH - wordWidth - MARGIN);
+
         // 생성 위치
-        float x = random.nextFloat() * SCREEN_WIDTH;
+        float x = MARGIN + random.nextFloat() * (maxX - MARGIN);
         float y = 0f;
 
         // 생성 시각

@@ -1,6 +1,7 @@
 package server.game;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import common.GameResult;
 import common.GameStatus;
@@ -43,7 +44,9 @@ public class ServerGameManager {
     private static final long SPAWN_INTERVAL = 2000L;
     private static final long SPEED_INTERVAL = 30000L;
 
-    private static final double ITEM_PROBABILITY = 0.1;
+    private static final double ITEM_PROBABILITY = 0.35;
+    // 게임 진행 로그
+    private final List<String> logMessage = new ArrayList<>();
 
     // 생성자
     public ServerGameManager(int gameId,
@@ -94,6 +97,7 @@ public class ServerGameManager {
 
         session.setStartTime(gameStartTime);
         session.setStatus(GameStatus.PLAYING);
+        addLog("게임이 시작되었습니다.");
 
         // 첫 번째 단어 생성
         player1WordManager.spawnWord();
@@ -122,6 +126,8 @@ public class ServerGameManager {
 
             player1WordManager.setSpeedLevel(speedLevel);
             player2WordManager.setSpeedLevel(speedLevel);
+            
+            addLog("속도 레벨이 " + speedLevel + "단계로 증가했습니다.");
         }
     }
 
@@ -169,6 +175,9 @@ public class ServerGameManager {
         // 1. 아이템 단어인지 먼저 확인
         boolean isCorrect =
                 itemManager.processItemInput(playerId, word);
+
+        // ItemManager에서 생성한 로그 가져오기
+        logMessage.addAll(itemManager.drainLogMessages());
 
         // 2. 아이템 단어가 아니라면 일반 단어 확인
         if (!isCorrect) {
@@ -321,6 +330,19 @@ public class ServerGameManager {
 
         // 게임 종료 상태로 변경
         session.setStatus(GameStatus.FINISHED);
+        
+        addLog("플레이어 " + session.getWinner().getPlayerId()
+                + "님이 승리했습니다.");
+    }
+    
+    // 게임 로그 추가
+    public synchronized void addLog(String message) {
+        logMessage.add(message);
+    }
+
+    // 게임 로그 반환
+    public synchronized List<String> getLogMessage() {
+        return new ArrayList<>(logMessage);
     }
 
 
