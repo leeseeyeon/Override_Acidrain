@@ -2,25 +2,27 @@ package client.game;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
 
 import client.network.MessageListener;
 import client.network.ServerConnection;
+import client.ui.*;
 import common.GameResult;
 import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
 import common.message.SignalMessage;
 import common.message.game.*;
-import javax.swing.SwingUtilities;
-import client.ui.*;
 
 public class GameController implements ActionListener, GameModelListener {
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS
+    private static final int DISCONNECT_REDIRECT_MS = 3000; // 3초
 
     private GameClientModel gameModel;
     private GameView gameView;
@@ -28,8 +30,16 @@ public class GameController implements ActionListener, GameModelListener {
     private ServerConnection serverConnection;
 
     private Timer gameLoopTimer;
+    private Timer disconnectTimer;
     private int localPlayerId = -1;
     private boolean isGameRunning = false;
+    private boolean isHandlingDisconnect = false;
+
+    // 동일한 itemId에 대한 Shadow 효과 중복 적용 방지용
+    private String lastProcessedItemId = null;
+
+    private Runnable onReturnToLobby;
+    private Runnable onReturnToLogin;
 
     public GameController(GameClientModel model, GameView view, ServerConnection connection) {
         this.gameModel = model;
@@ -48,8 +58,8 @@ public class GameController implements ActionListener, GameModelListener {
         if (this.gameView != null) {
             this.gameView.setWordSubmitListener(this);
         }
-        
-     // 서버 연결 끊김 감지 시 3초 오버레이 후 StartView로 복귀
+
+        // 서버 연결 끊김 감지 시 3초 오버레이 후 StartView로 복귀
         if (this.serverConnection != null) {
             this.serverConnection.addListener(new MessageListener() {
                 @Override
@@ -82,6 +92,14 @@ public class GameController implements ActionListener, GameModelListener {
         bindGameOverViewListeners();
     }
 
+    public void setOnReturnToLobby(Runnable onReturnToLobby) {
+        this.onReturnToLobby = onReturnToLobby;
+    }
+
+    public void setOnReturnToLogin(Runnable onReturnToLogin) {
+        this.onReturnToLogin = onReturnToLogin;
+    }
+
     public void onWordSubmitted(String word, double typingTime) {
         if (!isGameRunning || word == null) {
             return;
@@ -106,10 +124,39 @@ public class GameController implements ActionListener, GameModelListener {
         // 모델 상태 반영 -> 등록된 GameModelListener(GameView, GameController)로 자동 통지
         gameModel.applyServerUpdate(update);
 
+        // TODO: 프로토콜에 lastClaimedItem 필드가 추가되면 아래 주석을 해제하고 연동
+        // var claimed = update.getLastClaimedItem();
+        // if (claimed != null) {
+        //     handleLastClaimedItem(String.valueOf(claimed.getItemId()), claimed.getType(), claimed.getClaimedBy());
+        // }
+    }
+
+    /**
+     * 최근 획득된 아이템 정보를 처리합니다.
+     * 동일한 itemId에 대해서는 효과가 중복 적용되지 않습니다.
+     */
+    public void handleLastClaimedItem(String itemId, String itemType, int claimedBy) {
+        if (!isGameRunning || itemId == null || itemId.isBlank() || itemId.equals(lastProcessedItemId)) {
+            return;
+        }
+
+        lastProcessedItemId = itemId;
+
+        if (itemType != null && "SHADOW".equalsIgnoreCase(itemType.trim())) {
+            int myId = (gameModel != null && gameModel.getLocalPlayerId() != -1)
+                    ? gameModel.getLocalPlayerId()
+                    : this.localPlayerId;
+
+            // 획득자(claimedBy)가 상대방이면 내 화면에 시야 차단 적용
+            if (claimedBy != myId && myId != -1) {
+                onShadowEffectReceived(myId);
+            }
+        }
     }
 
     public void onGameFinished(GameResult result) {
         stopClientGameLoop();
+        lastProcessedItemId = null;
 
         if (gameView != null) {
             gameView.clearShadowEffects();
@@ -128,6 +175,7 @@ public class GameController implements ActionListener, GameModelListener {
 
     public void onClickRestart() {
         stopClientGameLoop();
+        lastProcessedItemId = null;
 
         if (gameOverView != null) {
             gameOverView.dispose();
@@ -138,20 +186,15 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearShadowEffects();
         }
 
-      //대기실 화면 전환
+        // 대기실 화면 전환
         if (onReturnToLobby != null) {
             onReturnToLobby.run();
         }
     }
-    
-    private Runnable onReturnToLobby;
-
-    public void setOnReturnToLobby(Runnable onReturnToLobby) {
-        this.onReturnToLobby = onReturnToLobby;
-    }
 
     public void onClickMainMenu() {
         stopClientGameLoop();
+        lastProcessedItemId = null;
 
         if (gameOverView != null) {
             gameOverView.dispose();
@@ -160,15 +203,16 @@ public class GameController implements ActionListener, GameModelListener {
         if (serverConnection != null) {
             serverConnection.disconnect();
         }
-        
+
         if (onReturnToLogin != null) {
             onReturnToLogin.run();
-        } 
+        }
     }
 
     public void startClientGameLoop() {
         stopClientGameLoop();
         isGameRunning = true;
+        lastProcessedItemId = null;
 
         if (gameView != null) {
             gameView.clearInputField();
@@ -195,7 +239,7 @@ public class GameController implements ActionListener, GameModelListener {
         stopClientGameLoop();
 
         if (serverConnection != null) {
-        	serverConnection.send(SignalMessage.gameQuit());
+            serverConnection.send(SignalMessage.gameQuit());
         }
     }
 
@@ -240,16 +284,6 @@ public class GameController implements ActionListener, GameModelListener {
             stopClientGameLoop();
         }
     }
-    
-    private static final int DISCONNECT_REDIRECT_MS = 3000; // 3초
-
-    private Timer disconnectTimer;
-    private boolean isHandlingDisconnect = false;
-    private Runnable onReturnToLogin;
-
-    public void setOnReturnToLogin(Runnable onReturnToLogin) {
-        this.onReturnToLogin = onReturnToLogin;
-    }
 
     public void onServerDisconnected() {
         SwingUtilities.invokeLater(() -> {
@@ -259,6 +293,7 @@ public class GameController implements ActionListener, GameModelListener {
             isHandlingDisconnect = true;
 
             stopClientGameLoop();
+            lastProcessedItemId = null;
 
             if (gameOverView != null) {
                 gameOverView.dispose();
@@ -314,6 +349,7 @@ public class GameController implements ActionListener, GameModelListener {
 
     public void onOpponentLeft() {
         stopClientGameLoop();
+        lastProcessedItemId = null;
 
         if (gameOverView != null) {
             gameOverView.dispose();
@@ -337,13 +373,19 @@ public class GameController implements ActionListener, GameModelListener {
             return null;
         }
     }
-    
+
     private void bindGameOverViewListeners() {
         if (gameOverView == null) {
             return;
         }
         gameOverView.setRestartButtonListener(e -> onClickRestart());
         gameOverView.setMainMenuButtonListener(e -> onClickMainMenu());
+        gameOverView.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                onClickMainMenu();
+            }
+        });
     }
 
     public void onShadowEffectReceived(int targetPlayerId) {
@@ -352,6 +394,4 @@ public class GameController implements ActionListener, GameModelListener {
         }
         gameView.triggerShadowEffect(targetPlayerId);
     }
-    
-    
 }

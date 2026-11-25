@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -261,28 +262,44 @@ public class PlayerGameBoardPanel extends JPanel {
 
     // 지정 시간(ms) 동안 Shadow 발동 (중복 피격 시 시간 초기화)
     public void triggerShadowEffect(int durationMs) {
-        if (shadowTimer != null && shadowTimer.isRunning()) {
-            shadowTimer.stop();
-        }
+        Runnable task = () -> {
+            if (shadowTimer != null && shadowTimer.isRunning()) {
+                shadowTimer.stop();
+            }
 
-        isShadowEffectActive = true;
-        repaint();
-
-        shadowTimer = new Timer(durationMs, e -> {
-            isShadowEffectActive = false;
+            isShadowEffectActive = true;
             repaint();
-            ((Timer) e.getSource()).stop();
-        });
-        shadowTimer.setRepeats(false);
-        shadowTimer.start();
+
+            shadowTimer = new Timer(durationMs, e -> {
+                isShadowEffectActive = false;
+                repaint();
+                ((Timer) e.getSource()).stop();
+            });
+            shadowTimer.setRepeats(false);
+            shadowTimer.start();
+        };
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeLater(task);
+        }
     }
 
     // 게임 종료·재시작 시 즉시 해제
     public void clearShadowEffect() {
-        if (shadowTimer != null && shadowTimer.isRunning()) {
-            shadowTimer.stop();
+        Runnable task = () -> {
+            if (shadowTimer != null && shadowTimer.isRunning()) {
+                shadowTimer.stop();
+            }
+            isShadowEffectActive = false;
+            repaint();
+        };
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeLater(task);
         }
-        isShadowEffectActive = false;
-        repaint();
     }
 }
