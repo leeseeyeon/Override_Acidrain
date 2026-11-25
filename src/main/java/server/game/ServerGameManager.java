@@ -331,7 +331,7 @@ public class ServerGameManager {
         // 게임 종료 상태로 변경
         session.setStatus(GameStatus.FINISHED);
         
-        addLog("플레이어 " + session.getWinner().getPlayerId()
+        addLog(session.getWinner().getNickname()
                 + "님이 승리했습니다.");
     }
     
