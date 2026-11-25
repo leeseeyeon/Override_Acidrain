@@ -9,7 +9,8 @@ public class GameStateUpdateMessage extends Message {
 	private List<PlayerStateData> playerStatesDatas;
     private List<ClientFallingWord> fallingWords;
 	private AttackItemWord attackItemWord;
-    
+	private List<String> logMessage;
+	
 	private GameStateUpdateMessage() {
 		super(MessageType.GAME_STATE_UPDATE);
 	}
@@ -31,6 +32,9 @@ public class GameStateUpdateMessage extends Message {
 
 	public AttackItemWord getAttackItemWord() {
 		return attackItemWord;
+	}
+	public List<String> getLogMessage() {
+	    return logMessage;
 	}
 
 }

@@ -12,6 +12,7 @@ public class ItemManager {
     private ItemFactory itemFactory;
     private double spawnProbability;
     private GameSession session;
+    private final List<String> logMessages = new ArrayList<>();
 
     // 생성자
     public ItemManager(GameSession session, double spawnProbability) {
@@ -61,6 +62,13 @@ public class ItemManager {
 
                     // 아이템 효과 적용
                     item.applyEffect(user, opponent);
+                    
+                 // 아이템 사용 로그 생성
+                    logMessages.add(
+                        "플레이어 " + playerId + "님이 "
+                        + item.getClass().getSimpleName()
+                        + " 아이템을 사용했습니다."
+                    );
 
                     // 획득한 아이템 제거
                     removeItem(item.getItemId());
@@ -100,5 +108,15 @@ public class ItemManager {
     public synchronized List<Item> getActiveItems() {
 
         return new ArrayList<>(activeItems);
+    }
+    
+ // 새로 생성된 아이템 로그 반환 및 초기화
+    public synchronized List<String> drainLogMessages() {
+
+        List<String> logs = new ArrayList<>(logMessages);
+
+        logMessages.clear();
+
+        return logs;
     }
 }
