@@ -6,6 +6,7 @@ import javax.swing.*;
 import client.network.*;
 import client.ui.*;
 import common.message.*;
+import common.message.game.*;
 import common.message.lobby.*;
 
 /*
@@ -22,6 +23,9 @@ public class LobbyController implements MessageListener, CountdownListener {
 
     private LobbyRole myRole = new GuestRole();
     private boolean isInLobby = false;
+
+    private GameStartMessage pendingGameStart;   // GAME_START 정보 (카운트다운이 끝나면 게임 화면에 넘김)
+    private int myPlayerId;                      // 게임에서 쓸 내 고유 id (GAME_START에 따로 없어서 직접 계산)
 
     public LobbyController(LobbyModel lobbyModel, LobbyView lobbyView, ServerConnection serverConnection,
                            ScreenNavigator screenNavigator, GameStartCountdown gameStartCountdown) {
@@ -47,6 +51,15 @@ public class LobbyController implements MessageListener, CountdownListener {
         changeMyRole(role);
         lobbyModel.enterRoom(myNickname, role == Role.HOST);
         lobbyModel.addChatMessage(ChatMessage.system("대기실에 입장했습니다."));
+        refreshActionButton();
+    }
+
+    // ===== 게임이 끝나고 같은 방 대기실로 돌아올 때 (MainFrame의 returnToLobbyScreen()이 호출) =====
+
+    /* enterLobby()와 달리 상대, 역할, 준비, 채팅을 초기화하지 않음 (게임 중에 받아 둔 방 상태를 그대로 유지) */
+    public void returnToLobby() {
+        isInLobby = true;
+        lobbyModel.addChatMessage(ChatMessage.system("대기실로 돌아왔습니다."));
         refreshActionButton();
     }
 
@@ -79,13 +92,13 @@ public class LobbyController implements MessageListener, CountdownListener {
         SwingUtilities.invokeLater(() -> handleServerMessage(json));
     }
 
-    /* 🔥🔥서버 쪽에서 연결이 끊겼을 때 받기 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
+    /* 서버 쪽에서 연결이 끊겼을 때 받기 쓰레드에서 호출됨 → Swing 쓰레드로 넘겨서 처리 */
     @Override
     public void onDisconnected() {
         SwingUtilities.invokeLater(this::handleDisconnected);
     }
 
-    /* 🔥🔥대기실에서 끊기면: 안내 → 3, 2, 1 → 시작 화면 */
+    /* 대기실에서 끊기면: 안내 → 3, 2, 1 → 시작 화면 */
     private void handleDisconnected() {
         if (!isInLobby) {
             return;   // 시작 화면, 게임 화면에서는 그 화면이 처리
@@ -111,23 +124,29 @@ public class LobbyController implements MessageListener, CountdownListener {
     }
 
     private void handleServerMessage(String json) {
-        if (!isInLobby) {
-            return;   // 입장 전(시작 화면) 또는 게임 화면으로 넘어간 뒤의 메시지는 무시
-        }
         Message message = decodeOrNull(json);
         if (message == null) {
             return;
         }
 
+        // 🔥🔥 방 상태(상대 입장 및 퇴장, 방장 승계, 상대 준비)는 게임 화면에 있는 동안에도 반영
+        // 게임 후 같은 방 대기실로 돌아왔을 때(returnToLobby) 서버와 상태가 맞도록
         switch (message.getType()) {
-            case MessageType.OPPONENT      -> handleOpponentJoined((OpponentMessage) message);
-            case MessageType.READY         -> handleGuestReadyChanged((ReadyMessage) message);
-            case MessageType.THEME         -> handleThemeChanged((ThemeMessage) message);
-            case MessageType.CHAT          -> handleChatReceived((common.message.lobby.ChatMessage) message);
-            case MessageType.ROLE          -> handleRoleChanged((RoleMessage) message);
-            case MessageType.OPPONENT_LEFT -> handleOpponentLeft();
-            case MessageType.GAME_START    -> handleGameStarted();
-            case MessageType.ERROR         -> handleLobbyError((ErrorMessage) message);
+            case MessageType.OPPONENT      -> { handleOpponentJoined((OpponentMessage) message); return; }
+            case MessageType.OPPONENT_LEFT -> { handleOpponentLeft(); return; }
+            case MessageType.ROLE          -> { handleRoleChanged((RoleMessage) message); return; }
+            case MessageType.READY         -> { handleGuestReadyChanged((ReadyMessage) message); return; }
+            default -> { }
+        }
+
+        if (!isInLobby) {
+            return;   // 나머지는 대기실에 있을 때만 처리 (입장 전, 게임 화면, 연결 끊김 후에는 무시)
+        }
+        switch (message.getType()) {
+            case MessageType.THEME      -> handleThemeChanged((ThemeMessage) message);
+            case MessageType.CHAT       -> handleChatReceived((common.message.lobby.ChatMessage) message);
+            case MessageType.GAME_START -> handleGameStarted((GameStartMessage) message);
+            case MessageType.ERROR      -> handleLobbyError((ErrorMessage) message);
             default -> { /* 대기실과 무관한 메시지는 무시 */ }
         }
     }
@@ -171,10 +190,20 @@ public class LobbyController implements MessageListener, CountdownListener {
         refreshActionButton();
     }
 
-    private void handleGameStarted() {
+    private void handleGameStarted(GameStartMessage gameStartMessage) {
+        pendingGameStart = gameStartMessage;
+        myPlayerId = findMyPlayerId(gameStartMessage);
         lobbyModel.setCountingDown(true);
         refreshActionButton();
         gameStartCountdown.start(this);
+    }
+
+    /* 서버는 GAME_START의 player1에 항상 방장을 넣음 → 방장이면 player1, 참가자면 player2의 고유 id (GAME_START에 내 id가 따로 없음) */
+    private int findMyPlayerId(GameStartMessage gameStartMessage) {
+        if (lobbyModel.isLocalPlayerHost()) {
+            return gameStartMessage.getPlayer1().getPlayerId();
+        }
+        return gameStartMessage.getPlayer2().getPlayerId();
     }
 
     private void handleLobbyError(ErrorMessage errorMessage) {
@@ -195,7 +224,8 @@ public class LobbyController implements MessageListener, CountdownListener {
     public void onCountdownFinished() {
         isInLobby = false;
         lobbyModel.setCountingDown(false);
-        screenNavigator.showGameScreen();   
+        lobbyModel.updateGuestReady(false);   // 게임이 시작되면 준비 상태는 소모됨 (서버도 게임이 끝나면 준비를 false로 되돌림)
+        screenNavigator.showGameScreen(pendingGameStart, myPlayerId);   // 게임 시작 정보 + 내 id 전달
     }
 
 
