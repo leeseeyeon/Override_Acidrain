@@ -17,7 +17,7 @@ public class WordManager {
 
     // 게임 화면 좌표
     private static final float SCREEN_WIDTH = 300f;
-    public static final float SCREEN_HEIGHT =420f;
+    public static final float SCREEN_HEIGHT = 400f;
     
     // 단어 잘림 방지를 위한 설정값
     private static final float CHAR_WIDTH = 15f;
