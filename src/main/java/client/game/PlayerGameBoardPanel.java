@@ -235,7 +235,7 @@ public class PlayerGameBoardPanel extends JPanel {
 
         // 2. 그림자 방해 효과 렌더링 (상단 상태바·하단 입력창은 자식 컴포넌트라 가려지지 않음)
         if (isShadowEffectActive) {
-            g2d.setColor(new Color(15, 23, 42, 220));
+            g2d.setColor(new Color(15, 23, 42, 255));
             g2d.fillRect(0, 0, getWidth(), getHeight());
 
             g2d.setFont(new Font("맑은 고딕", Font.BOLD, 16));
