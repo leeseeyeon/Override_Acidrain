@@ -2,6 +2,7 @@ package client.start;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 
 import javax.swing.*;
 
@@ -10,14 +11,16 @@ import javax.swing.*;
  * 판단은 하지 않고 보여 주기만 함. 버튼이 눌렸을 때 할 일은 StartController가 정함.
  */
 public class StartView extends JPanel {
-    private static final Color BACKGROUND_COLOR = new Color(248, 250, 252);        // 화면 배경
-    private static final Color DESCRIPTION_COLOR = new Color(226, 232, 240);       // 시나리오 배경
-    private static final Color FORM_COLOR = new Color(235, 240, 248);              // 닉네임 입력 상자
-    private static final Color FORM_BORDER_COLOR = new Color(169, 170, 171);       // 입력 상자 테두리
-    private static final Color BUTTON_COLOR = new Color(70, 99, 196);              // 버튼
-    private static final Color ERROR_TEXT_COLOR = new Color(230, 30, 30);          // 에러 글자
-    private static final Color PLACEHOLDER_COLOR = new Color(184, 184, 184);       // 플레이스홀더
+    private static final Color BACKGROUND_COLOR = new Color(248, 250, 252);        // 화면 배경: 거의 흰색
+    private static final Color DESCRIPTION_COLOR = new Color(226, 232, 240);       // 설명 띠: 연한 회청색 (대기실 배경과 같음)
+    private static final Color FORM_COLOR = new Color(235, 240, 248);              // 닉네임 입력 상자: 연한 파랑
+    private static final Color FORM_BORDER_COLOR = new Color(169, 170, 171);       // 입력 상자 테두리: 회색
+    private static final Color BUTTON_COLOR = new Color(70, 99, 196);              // 버튼: 파랑 (대기실 버튼과 같음)
+    private static final Color ERROR_TEXT_COLOR = new Color(230, 30, 30);          // 에러 글자: 빨강
+    private static final Color PLACEHOLDER_COLOR = new Color(184, 184, 184);       // 입력칸 안내 글자: 연한 회색
     private static final String PLACEHOLDER_TEXT = "사용할 닉네임을 입력하세요";
+    private static final String LOGO_PATH = "/images/start_logo.png";   // src/main/resources 기준 경로
+    private static final int LOGO_HEIGHT = 340;                          // 화면에 보일 로고 높이 (너비는 비율대로)
 
     private JLabel logoLabel;
     private JPanel descriptionPanel;
@@ -35,27 +38,28 @@ public class StartView extends JPanel {
 
         descriptionPanel = new JPanel();
         descriptionPanel.setBackground(DESCRIPTION_COLOR);
-        descriptionPanel.setBounds(0, 275, 1000, 191);
+        descriptionPanel.setBounds(0, 388, 1000, 84);   // 얇은 띠
         descriptionPanel.setLayout(null);
         add(descriptionPanel);
 
-        logoLabel = new JLabel("대머리를 피해라!");
-        logoLabel.setBounds(0, 173, 1000, 90);
+        logoLabel = new JLabel("SSS급 타자천재가 키보드를 잡았다");   // 로고 이미지를 못 찾으면 이 글자가 대신 보임
+        logoLabel.setBounds(0, 20, 1000, 350);
         add(logoLabel);
         logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        logoLabel.setFont(new Font("맑은 고딕", Font.BOLD, 60));
+        logoLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 60));
+        showLogoImage();
         
-        descriptionLabel = new JLabel("<html><center>하늘에서 산성비가 내리기 시작합니다...<br><br>"
-                + "빠르게 단어를 입력해 산성비를 제거하세요!</center></html>"); // TODO: 실제 설명 문구! 수정 필요.
+        descriptionLabel = new JLabel("<html><center>단어로 된 산성비가 내리는 세상, <br>" + "살아남기 위해서는 누구보다 빠르고 정확한 타자 실력이 필요합니다.<br>"
+                + "자신의 타자실력을 증명하고 승리를 차지하세요!</center></html>"); // TODO: 실제 설명 문구! 수정 필요.
         descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        descriptionLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 18));
-        descriptionLabel.setBounds(0, 10, 1000, 171);
+        descriptionLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
+        descriptionLabel.setBounds(0, 0, 1000, 84);   // 띠 높이와 같게 → 세로 가운데
         descriptionPanel.add(descriptionLabel);
 
         nicknameFormPanel = new JPanel();
         nicknameFormPanel.setBackground(FORM_COLOR);
         nicknameFormPanel.setBorder(BorderFactory.createLineBorder(FORM_BORDER_COLOR, 1));
-        nicknameFormPanel.setBounds(286, 496, 420, 215);
+        nicknameFormPanel.setBounds(290, 500, 420, 215);
         nicknameFormPanel.setLayout(null);
         add(nicknameFormPanel);
 
@@ -109,6 +113,20 @@ public class StartView extends JPanel {
         nicknameFormPanel.add(gameStartButton);
 
 
+    }
+
+    /** src/main/resources/images/start_logo.png 를 높이 LOGO_HEIGHT에 맞춰 줄여서 로고 자리에 표시 */
+    private void showLogoImage() {
+        URL logoUrl = getClass().getResource(LOGO_PATH);
+        if (logoUrl == null) {   // 파일이 없거나 경로가 틀림 → 글자 로고 그대로 둠
+            System.err.println("[StartView] 로고 이미지를 찾을 수 없음: " + LOGO_PATH);
+            return;
+        }
+        ImageIcon originalLogo = new ImageIcon(logoUrl);
+        int logoWidth = originalLogo.getIconWidth() * LOGO_HEIGHT / originalLogo.getIconHeight();   // 가로세로 비율 유지
+        Image scaledLogo = originalLogo.getImage().getScaledInstance(logoWidth, LOGO_HEIGHT, Image.SCALE_SMOOTH);
+        logoLabel.setIcon(new ImageIcon(scaledLogo));
+        logoLabel.setText(null);   // 이미지만 보이게
     }
 
     // ===== Controller가 쓰는 메소드 (유지) =====
