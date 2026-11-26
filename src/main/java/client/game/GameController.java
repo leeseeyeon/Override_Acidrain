@@ -14,6 +14,7 @@ import client.network.MessageListener;
 import client.network.ServerConnection;
 import client.ui.*;
 import common.GameResult;
+import common.ItemType;
 import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
@@ -124,25 +125,24 @@ public class GameController implements ActionListener, GameModelListener {
         // 모델 상태 반영 -> 등록된 GameModelListener(GameView, GameController)로 자동 통지
         gameModel.applyServerUpdate(update);
 
-        // TODO: 프로토콜에 lastClaimedItem 필드가 추가되면 아래 주석을 해제하고 연동
-        // var claimed = update.getLastClaimedItem();
-        // if (claimed != null) {
-        //     handleLastClaimedItem(String.valueOf(claimed.getItemId()), claimed.getType(), claimed.getClaimedBy());
-        // }
+        LastClaimedItem claimed = update.getLastClaimedItem();
+        if (claimed != null) {
+            handleLastClaimedItem(String.valueOf(claimed.getItemId()), claimed.getType(), claimed.getClaimedBy());
+        }
     }
 
     /**
      * 최근 획득된 아이템 정보를 처리합니다.
      * 동일한 itemId에 대해서는 효과가 중복 적용되지 않습니다.
      */
-    public void handleLastClaimedItem(String itemId, String itemType, int claimedBy) {
+    public void handleLastClaimedItem(String itemId, ItemType itemType, int claimedBy) {
         if (!isGameRunning || itemId == null || itemId.isBlank() || itemId.equals(lastProcessedItemId)) {
             return;
         }
 
         lastProcessedItemId = itemId;
 
-        if (itemType != null && "SHADOW".equalsIgnoreCase(itemType.trim())) {
+        if (itemType == ItemType.SHADOW) {
             int myId = (gameModel != null && gameModel.getLocalPlayerId() != -1)
                     ? gameModel.getLocalPlayerId()
                     : this.localPlayerId;

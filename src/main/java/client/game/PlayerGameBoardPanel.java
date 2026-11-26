@@ -29,6 +29,7 @@ import common.message.game.PlayerStateData;
 public class PlayerGameBoardPanel extends JPanel {
     private static final int BOARD_WIDTH = 350;
     private static final int BOARD_HEIGHT = 400;
+    private static final float SERVER_SCREEN_HEIGHT = 400.0f;
     private static final int SHADOW_DURATION_MS = 4500; // 4.5초
 
     private JLabel playerNameLabel;
@@ -202,6 +203,9 @@ public class PlayerGameBoardPanel extends JPanel {
             g2d.setFont(new Font("맑은 고딕", Font.BOLD, 14));
             FontMetrics fm = g2d.getFontMetrics();
 
+            int padX = 8;
+            int padY = 4;
+
             for (ClientFallingWord word : fallingWords) {
                 if (word == null || word.getText() == null) {
                     continue;
@@ -209,10 +213,9 @@ public class PlayerGameBoardPanel extends JPanel {
 
                 String text = word.getText();
                 int x = (int) word.getX();
-                int y = (int) word.getY();
+                // 서버 기준 높이(400) -> 실제 패널 높이에 맞게 비례 변환
+                int y = (int) ((word.getY() / SERVER_SCREEN_HEIGHT) * getHeight());
 
-                int padX = 8;
-                int padY = 4;
                 int boxWidth = fm.stringWidth(text) + padX * 2;
                 int boxHeight = fm.getHeight() + padY * 2;
 
