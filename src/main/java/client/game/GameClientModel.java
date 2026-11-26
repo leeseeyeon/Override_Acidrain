@@ -91,6 +91,12 @@ public class GameClientModel {
 			wordsChanged = true;
 			stateChanged = true;
 		}
+		
+		// 게임 로그 반영 (서버가 전체 로그를 보내므로 내용이 바뀌었을 때만 갱신)
+		if (update.getLogMessage() != null && !update.getLogMessage().equals(this.logs)) {
+			this.logs = new ArrayList<>(update.getLogMessage());
+			stateChanged = true;
+		}
 
 		// 변경된 항목에 맞춰 리스너 통지
 		if (wordsChanged) {
