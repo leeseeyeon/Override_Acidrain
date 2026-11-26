@@ -13,13 +13,15 @@ import javax.swing.Timer;
 import client.network.MessageListener;
 import client.network.ServerConnection;
 import client.ui.*;
-import common.GameResult;
-import common.ItemType;
+import common.dto.GameResult;
+import common.dto.LastClaimedItem;
+import common.dto.PlayerStateData;
 import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
 import common.message.SignalMessage;
 import common.message.game.*;
+import common.type.ItemType;
 
 public class GameController implements ActionListener, GameModelListener {
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS

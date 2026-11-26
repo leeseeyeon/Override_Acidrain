@@ -1,6 +1,6 @@
-package common.message.game;
+package common.dto;
 
-import common.ItemType;
+import common.type.ItemType;
 
 // 가장 최근에 누가 어떤 아이템을 먹었는지 (클라는 itemId로 중복 처리 방지)
 public class LastClaimedItem {

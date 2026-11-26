@@ -3,6 +3,7 @@ package client.lobby;
 import java.util.*;
 
 import common.message.*;
+import common.type.Theme;
 
 /*
 대기실 상태 (Model)

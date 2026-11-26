@@ -1,6 +1,5 @@
 package server.game.word;
 
-import common.message.Theme;
 import server.db.DatabaseConnector;
 
 import java.sql.Connection;
@@ -11,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import common.type.Theme;
 
 public class DBWordRepository implements WordRepository {
 

@@ -4,9 +4,10 @@ import javax.swing.*;
 
 import client.network.*;
 import client.ui.*;
-import common.NetworkConfig;
+import common.config.NetworkConfig;
 import common.message.*;
 import common.message.lobby.*;
+import common.type.ErrorCode;
 
 /**
  * StartController

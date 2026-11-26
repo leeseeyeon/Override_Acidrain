@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import common.GameResult;
+import common.dto.GameResult;
 
 public class GameOverView extends JFrame {
     private ResultScreen screenStrategy;

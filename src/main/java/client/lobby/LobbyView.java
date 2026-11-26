@@ -8,6 +8,7 @@ import java.util.function.*;
 import javax.swing.*;
 
 import common.message.*;
+import common.type.Theme;
 
 //MVC 중 View 담당. Observer!
 public class LobbyView extends JPanel implements LobbyModelListener {

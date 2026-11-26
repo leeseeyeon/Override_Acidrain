@@ -14,6 +14,7 @@ import client.network.*;
 import client.start.*;
 import common.message.*;
 import common.message.game.GameStartMessage;
+import common.type.Role;
 
 /**
  * prototype (전원 공유!)

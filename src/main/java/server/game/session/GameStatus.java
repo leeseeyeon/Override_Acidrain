@@ -1,4 +1,4 @@
-package common;
+package server.game.session;
 
 public enum GameStatus {
 	READY,

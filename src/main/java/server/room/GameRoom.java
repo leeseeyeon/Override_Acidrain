@@ -6,14 +6,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import common.message.ErrorCode;
+import common.dto.PlayerProfile;
 import common.message.ErrorMessage;
 import common.message.Message;
-import common.message.Role;
 import common.message.SignalMessage;
-import common.message.Theme;
-import common.message.game.PlayerProfile;
 import common.message.lobby.*;
+import common.type.ErrorCode;
+import common.type.Role;
+import common.type.Theme;
 import common.message.game.*;
 import server.game.ServerGameManager;
 import server.game.player.Player;

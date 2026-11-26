@@ -3,16 +3,16 @@ package server.room;
 import java.util.ArrayList;
 import java.util.List;
 
-import common.message.game.AttackItemWord;
-import common.message.game.ClientFallingWord;
+import common.dto.AttackItemWord;
+import common.dto.ClientFallingWord;
+import common.dto.LastClaimedItem;
+import common.dto.PlayerStateData;
 import common.message.game.GameStateUpdateMessage;
-import common.message.game.PlayerStateData;
 import server.game.ServerGameManager;
 import server.game.item.Item;
 import server.game.player.Player;
 import server.game.player.TypingStats;
 import server.game.word.FallingWord;
-import common.message.game.LastClaimedItem;
 
 // 게임 로직 상태 → GAME_STATE_UPDATE 메시지로 변환 (게임 로직은 메시지 형식을 몰라도 되게)
 final class GameStateMapper {
