@@ -1,6 +1,6 @@
 package server.game.item;
 
-import common.ItemType;
+import common.type.ItemType;
 import server.game.player.*;
 public class Item {
 	private int itemId; //아이템 고유번호

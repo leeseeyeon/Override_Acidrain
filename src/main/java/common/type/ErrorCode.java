@@ -1,4 +1,4 @@
-package common.message;
+package common.type;
 
 public enum ErrorCode {
 	// 대기실용 에러코드

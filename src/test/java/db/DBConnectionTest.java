@@ -1,10 +1,10 @@
 package db;
 
+import common.type.Theme;
 import server.game.word.DBWordRepository;
 import server.game.word.WordRepository;
 import server.game.word.WordManager;
 import server.game.word.FallingWord;
-import common.message.Theme;
 
 public class DBConnectionTest {
 

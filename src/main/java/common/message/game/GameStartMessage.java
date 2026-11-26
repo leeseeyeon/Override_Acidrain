@@ -1,8 +1,9 @@
 package common.message.game;
 
+import common.dto.PlayerProfile;
 import common.message.Message;
 import common.message.MessageType;
-import common.message.Theme;
+import common.type.Theme;
 
 public class GameStartMessage extends Message {
     private int gameId;

@@ -8,6 +8,9 @@ import client.ui.*;
 import common.message.*;
 import common.message.game.*;
 import common.message.lobby.*;
+import common.type.ErrorCode;
+import common.type.Role;
+import common.type.Theme;
 
 /*
 대기실 Controller

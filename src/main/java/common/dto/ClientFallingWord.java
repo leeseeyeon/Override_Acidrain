@@ -1,4 +1,4 @@
-package common.message.game;
+package common.dto;
 
 public class ClientFallingWord {
 	private int wordId;

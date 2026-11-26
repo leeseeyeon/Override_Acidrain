@@ -6,6 +6,7 @@ import java.util.function.*;
 import javax.swing.*;
 
 import common.message.*;
+import common.type.Theme;
 
 /*
 옵션선택 영역 (View 부품) - 단어 테마 선택

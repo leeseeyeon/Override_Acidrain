@@ -1,4 +1,4 @@
-package common.message.game;
+package common.dto;
 
 public class PlayerProfile {
     private int playerId;

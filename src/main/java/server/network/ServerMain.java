@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import common.NetworkConfig;
+import common.config.NetworkConfig;
 import server.room.RoomManager;
 
 public class ServerMain {

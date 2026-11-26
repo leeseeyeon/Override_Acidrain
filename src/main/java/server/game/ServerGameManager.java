@@ -3,11 +3,10 @@ package server.game;
 import java.util.List;
 import java.util.ArrayList;
 
-import common.GameResult;
-import common.GameStatus;
-import common.message.Theme;
-
+import common.dto.GameResult;
+import common.type.Theme;
 import server.game.session.GameSession;
+import server.game.session.GameStatus;
 import server.game.player.Player;
 import server.game.word.WordManager;
 import server.game.word.WordRepository;

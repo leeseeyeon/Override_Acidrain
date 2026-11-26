@@ -1,7 +1,6 @@
 package server.game.session;
-import common.GameStatus;
 import server.game.player.*;
-import common.message.Theme;
+import common.type.Theme;
 public class GameSession {
 	private int gameId;
 	private Player player1;

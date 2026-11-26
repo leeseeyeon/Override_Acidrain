@@ -5,12 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import common.message.game.AttackItemWord;
-import common.message.game.ClientFallingWord;
+import common.dto.AttackItemWord;
+import common.dto.ClientFallingWord;
+import common.dto.PlayerStateData;
 import common.message.game.GameStateUpdateMessage;
-import common.message.game.PlayerStateData;
-
-import common.message.game.PlayerStateData;
 
 public class GameClientModel {
 	private int localPlayerId = -1;

@@ -23,8 +23,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import common.message.game.ClientFallingWord;
-import common.message.game.PlayerStateData;
+import common.dto.ClientFallingWord;
+import common.dto.PlayerStateData;
 
 public class PlayerGameBoardPanel extends JPanel {
     private static final int BOARD_WIDTH = 350;
