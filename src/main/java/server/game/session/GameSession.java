@@ -1,6 +1,8 @@
 package server.game.session;
 import server.game.player.*;
 import common.type.Theme;
+
+
 public class GameSession {
 	private int gameId;
 	private Player player1;
@@ -11,6 +13,7 @@ public class GameSession {
 	private final Theme selectedTheme; // common값 사용. 참조하기
 	private Player winner;
 	
+	//게임세션 생성자
 	public GameSession(int gameId, Player player1, Player player2,Theme theme) {
 		this.gameId = gameId;
 		this.player1 = player1;

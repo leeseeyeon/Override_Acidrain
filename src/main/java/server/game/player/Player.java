@@ -1,12 +1,13 @@
 package server.game.player;
 
 public class Player {
-	private int playerId;
-	private String nickname;
-	private TypingStats typingStats;
-	private int hp;
-	private static final int MAX_HP = 100;
+	private int playerId; //playerid _ 대기실에서 할당됨
+	private String nickname; //설정된 nickname
+	private TypingStats typingStats; //타수
+	private int hp; 
+	private static final int MAX_HP = 100; //최대 100
 	
+	//player 생성자
 	public Player(int playerid, String nickname) {
 		this.playerId = playerid;
 		this.nickname = nickname;
@@ -14,13 +15,15 @@ public class Player {
 		this.typingStats = new TypingStats();
 	}
 	
+	//피 감소
 	public void decreaseHP(int amount) {
 		this.hp = hp-amount;
 		if (hp <= 0) {
 			this.hp = 0;
 		}
 	}
-	
+	 
+	//피 증가
 	public void increaseHP(int amount) {
 		this.hp = hp+amount;
 		if (hp>=MAX_HP) {
@@ -28,10 +31,12 @@ public class Player {
 		}
 	}
 	
+	//즉었는지 체크-> win판정시 사용
 	public boolean isDead() {
 		return hp <=0;
 	}
 	
+	//getter
 	public int getPlayerId() {
 		return playerId;		
 	}
