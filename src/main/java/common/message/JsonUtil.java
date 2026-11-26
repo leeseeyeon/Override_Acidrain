@@ -57,6 +57,17 @@ public class JsonUtil {
         }
         return GSON.fromJson(json, cls);
     }
+    
+    // 해석 못 하는 메시지(등록 안 된 type, 깨진 JSON 등)면 로그 남기고 null 반환
+    // caller: 로그에 찍힐 호출한 쪽 이름 (예: "LobbyController")
+    public static Message decodeOrNull(String json, String caller) {
+        try {
+            return decode(json);
+        } catch (RuntimeException e) {
+            System.err.println("[" + caller + "] 해석할 수 없는 메시지: " + json);
+            return null;
+        }
+    }
 
     // 내부용: 메시지 타입만 꺼내기
     private static String getType(String json) {

@@ -55,11 +55,8 @@ public class ClientHandler implements Runnable {
     }
 
     private void handle(String request) {
-        Message m;
-        try {
-            m = JsonUtil.decode(request);
-        } catch (Exception e) {
-            log("해석할 수 없는 메시지: " + request);
+        Message m = JsonUtil.decodeOrNull(request, "ClientHandler");
+        if (m == null) {
             return;
         }
         
