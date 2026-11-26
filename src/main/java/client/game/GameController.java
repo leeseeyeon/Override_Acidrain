@@ -143,14 +143,15 @@ public class GameController implements ActionListener, GameModelListener {
         lastProcessedItemId = itemId;
 
         if (itemType == ItemType.SHADOW) {
-            int myId = (gameModel != null && gameModel.getLocalPlayerId() != -1)
-                    ? gameModel.getLocalPlayerId()
-                    : this.localPlayerId;
-
-            // 획득자(claimedBy)가 상대방이면 내 화면에 시야 차단 적용
-            if (claimedBy != myId && myId != -1) {
-                onShadowEffectReceived(myId);
+            // 먹은 사람의 상대방 판을 가림 (두 화면 모두 같은 판이 가려짐)
+            PlayerStateData p1 = gameModel.getPlayer1state();
+            PlayerStateData p2 = gameModel.getPlayer2state();
+            if (p1 == null || p2 == null) {
+                return;
             }
+
+            int victimId = (claimedBy == p1.getplayerId()) ? p2.getplayerId() : p1.getplayerId();
+            onShadowEffectReceived(victimId);
         }
     }
 
