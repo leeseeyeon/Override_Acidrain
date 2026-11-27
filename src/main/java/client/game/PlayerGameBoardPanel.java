@@ -26,11 +26,32 @@ import javax.swing.event.DocumentListener;
 import common.dto.ClientFallingWord;
 import common.dto.PlayerStateData;
 
+// 개별 플레이어의 상태(닉네임, HP), 낙하 단어, 입력창 및 시야 차단 효과를 렌더링하는 보드 패널
 public class PlayerGameBoardPanel extends JPanel {
     private static final int BOARD_WIDTH = 350;
     private static final int BOARD_HEIGHT = 400;
     private static final float SERVER_SCREEN_HEIGHT = 400.0f;
-    private static final int SHADOW_DURATION_MS = 4500; // 4.5초
+    private static final int SHADOW_DURATION_MS = 4500;
+    private static final int MAX_HP = 100;
+
+    private static final Color PANEL_BG_COLOR = new Color(248, 250, 252);
+    private static final Color PANEL_BORDER_COLOR = new Color(200, 208, 220);
+    private static final Color SUB_PANEL_BG_COLOR = new Color(235, 240, 248);
+    private static final Color PLAYER_NAME_COLOR = new Color(30, 41, 59);
+    private static final Color HP_BG_COLOR = new Color(226, 232, 240);
+    private static final Color HP_HIGH_COLOR = new Color(46, 204, 113);
+    private static final Color HP_MID_COLOR = new Color(243, 156, 18);
+    private static final Color HP_LOW_COLOR = new Color(231, 76, 60);
+
+    private static final Color WORD_BORDER_COLOR = new Color(100, 116, 139);
+    private static final Color WORD_TEXT_COLOR = new Color(15, 23, 42);
+    private static final Color SHADOW_BG_COLOR = new Color(15, 23, 42, 255);
+    private static final Color SHADOW_TEXT_COLOR = new Color(226, 232, 240);
+
+    private static final Font NAME_FONT = new Font("맑은 고딕", Font.BOLD, 14);
+    private static final Font INPUT_FONT = new Font("맑은 고딕", Font.PLAIN, 14);
+    private static final Font WORD_FONT = new Font("맑은 고딕", Font.BOLD, 14);
+    private static final Font SHADOW_FONT = new Font("맑은 고딕", Font.BOLD, 16);
 
     private JLabel playerNameLabel;
     private JProgressBar hpGaugeBar;
@@ -53,37 +74,37 @@ public class PlayerGameBoardPanel extends JPanel {
         setMinimumSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
         setSize(BOARD_WIDTH, BOARD_HEIGHT);
         setLayout(new BorderLayout(0, 0));
-        setBackground(new Color(248, 250, 252));
-        setBorder(BorderFactory.createLineBorder(new Color(200, 208, 220), 2));
+        setBackground(PANEL_BG_COLOR);
+        setBorder(BorderFactory.createLineBorder(PANEL_BORDER_COLOR, 2));
 
-        // 상단: 플레이어 닉네임 및 HP 게이지 영역
+        // 상단: 닉네임 및 HP 게이지
         JPanel topPanel = new JPanel(new BorderLayout(0, 6));
         topPanel.setBorder(new EmptyBorder(8, 10, 8, 10));
-        topPanel.setBackground(new Color(235, 240, 248));
+        topPanel.setBackground(SUB_PANEL_BG_COLOR);
 
         playerNameLabel = new JLabel("Player");
-        playerNameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-        playerNameLabel.setForeground(new Color(30, 41, 59));
+        playerNameLabel.setFont(NAME_FONT);
+        playerNameLabel.setForeground(PLAYER_NAME_COLOR);
         topPanel.add(playerNameLabel, BorderLayout.NORTH);
 
-        hpGaugeBar = new JProgressBar(0, 100);
-        hpGaugeBar.setValue(100);
+        hpGaugeBar = new JProgressBar(0, MAX_HP);
+        hpGaugeBar.setValue(MAX_HP);
         hpGaugeBar.setStringPainted(true);
-        hpGaugeBar.setString("100 / 100");
+        hpGaugeBar.setString(MAX_HP + " / " + MAX_HP);
         hpGaugeBar.setPreferredSize(new Dimension(0, 20));
-        hpGaugeBar.setForeground(new Color(46, 204, 113));
-        hpGaugeBar.setBackground(new Color(226, 232, 240));
+        hpGaugeBar.setForeground(HP_HIGH_COLOR);
+        hpGaugeBar.setBackground(HP_BG_COLOR);
         topPanel.add(hpGaugeBar, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);
 
-        // 하단: 단어 입력 영역 (중앙은 비워두어 paintComponent에서 낙하 단어를 직접 그림)
+        // 하단: 단어 입력창 (중앙 영역은 paintComponent에서 낙하 단어 렌더링)
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(new EmptyBorder(8, 10, 8, 10));
-        bottomPanel.setBackground(new Color(235, 240, 248));
+        bottomPanel.setBackground(SUB_PANEL_BG_COLOR);
 
         wordInputField = new JTextField();
-        wordInputField.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+        wordInputField.setFont(INPUT_FONT);
         wordInputField.setPreferredSize(new Dimension(0, 30));
         initTypingTimer();
         bottomPanel.add(wordInputField, BorderLayout.CENTER);
@@ -91,6 +112,7 @@ public class PlayerGameBoardPanel extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
+    // 첫 글자 입력 시점부터 타이핑 경과 시간 측정 시작
     private void initTypingTimer() {
         wordInputField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -112,6 +134,7 @@ public class PlayerGameBoardPanel extends JPanel {
         });
     }
 
+    // 플레이어 닉네임과 HP 게이지 갱신
     public void updatePlayerStatus(PlayerStateData state) {
         if (state == null) {
             return;
@@ -124,29 +147,25 @@ public class PlayerGameBoardPanel extends JPanel {
             playerNameLabel.setText(state.getNickname());
         }
 
-        int maxHp = 100;
-        int currentHp = Math.max(0, Math.min(state.getCurrentHp(), maxHp));
-
-        hpGaugeBar.setMaximum(maxHp);
+        int currentHp = Math.max(0, Math.min(state.getCurrentHp(), MAX_HP));
+        hpGaugeBar.setMaximum(MAX_HP);
         hpGaugeBar.setValue(currentHp);
-        hpGaugeBar.setString(currentHp + " / " + maxHp);
-
-        double ratio = (double) currentHp / maxHp;
-        if (ratio > 0.5) {
-            hpGaugeBar.setForeground(new Color(46, 204, 113)); // 녹색
-        } else if (ratio > 0.25) {
-            hpGaugeBar.setForeground(new Color(243, 156, 18)); // 주황색
-        } else {
-            hpGaugeBar.setForeground(new Color(231, 76, 60));  // 빨간색
-        }
+        hpGaugeBar.setString(currentHp + " / " + MAX_HP);
+        hpGaugeBar.setForeground(getHpColor((double) currentHp / MAX_HP));
     }
 
-    public void updateFallingWords(List<ClientFallingWord> words) {
-        if (words == null) {
-            this.fallingWords = new ArrayList<>();
-        } else {
-            this.fallingWords = new ArrayList<>(words);
+    private Color getHpColor(double ratio) {
+        if (ratio > 0.5) {
+            return HP_HIGH_COLOR;
+        } else if (ratio > 0.25) {
+            return HP_MID_COLOR;
         }
+        return HP_LOW_COLOR;
+    }
+
+    // 서버에서 받은 낙하 단어 목록을 반영하고 화면 갱신
+    public void updateFallingWords(List<ClientFallingWord> words) {
+        this.fallingWords = (words == null) ? new ArrayList<>() : new ArrayList<>(words);
         repaint();
     }
 
@@ -154,7 +173,7 @@ public class PlayerGameBoardPanel extends JPanel {
         return wordInputField.getText().trim();
     }
 
-    // 입력 시작~제출까지의 경과 시간 반환 (초 단위, 서버가 ms 단위면 / 1000.0 제거)
+    // 입력 시작부터 제출까지의 경과 시간(초) 반환 후 타이머 초기화
     public double consumeTypingTime() {
         if (typingStartTimeMs == 0L) {
             return 0.0;
@@ -183,6 +202,7 @@ public class PlayerGameBoardPanel extends JPanel {
         return isShadowEffectActive;
     }
 
+    // 기존 리스너를 제거한 뒤 단일 단어 제출 리스너 등록
     public void addWordSubmitListener(ActionListener listener) {
         for (ActionListener old : wordInputField.getActionListeners()) {
             wordInputField.removeActionListener(old);
@@ -198,56 +218,63 @@ public class PlayerGameBoardPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // 1. 떨어지는 단어 렌더링
-        if (fallingWords != null && !fallingWords.isEmpty()) {
-            g2d.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-            FontMetrics fm = g2d.getFontMetrics();
+        drawFallingWords(g2d);
 
-            int padX = 8;
-            int padY = 4;
-
-            for (ClientFallingWord word : fallingWords) {
-                if (word == null || word.getText() == null) {
-                    continue;
-                }
-
-                String text = word.getText();
-                int x = (int) word.getX();
-                // 서버 기준 높이(400) -> 실제 패널 높이에 맞게 비례 변환
-                int y = (int) ((word.getY() / SERVER_SCREEN_HEIGHT) * getHeight());
-
-                int boxWidth = fm.stringWidth(text) + padX * 2;
-                int boxHeight = fm.getHeight() + padY * 2;
-
-                // 단어 배경 박스
-                g2d.setColor(Color.WHITE);
-                g2d.fillRoundRect(x, y - fm.getAscent() - padY, boxWidth, boxHeight, 10, 10);
-
-                // 단어 테두리
-                g2d.setColor(new Color(100, 116, 139));
-                g2d.drawRoundRect(x, y - fm.getAscent() - padY, boxWidth, boxHeight, 10, 10);
-
-                // 단어 텍스트
-                g2d.setColor(new Color(15, 23, 42));
-                g2d.drawString(text, x + padX, y);
-            }
-        }
-
-        // 2. 그림자 방해 효과 렌더링 (상단 상태바·하단 입력창은 자식 컴포넌트라 가려지지 않음)
+        // 상단 상태바·하단 입력창은 자식 컴포넌트라 오버레이에 가려지지 않음
         if (isShadowEffectActive) {
-            g2d.setColor(new Color(15, 23, 42, 255));
-            g2d.fillRect(0, 0, getWidth(), getHeight());
-
-            g2d.setFont(new Font("맑은 고딕", Font.BOLD, 16));
-            g2d.setColor(new Color(226, 232, 240));
-            String msg = "시야 차단 효과 적용 중";
-            FontMetrics fm = g2d.getFontMetrics();
-            int textX = (getWidth() - fm.stringWidth(msg)) / 2;
-            int textY = getHeight() / 2;
-            g2d.drawString(msg, textX, textY);
+            drawShadowOverlay(g2d);
         }
 
         g2d.dispose();
+    }
+
+    // 서버 기준 Y 좌표를 현재 패널 높이에 비례 변환해 낙하 단어 렌더링
+    private void drawFallingWords(Graphics2D g2d) {
+        if (fallingWords == null || fallingWords.isEmpty()) {
+            return;
+        }
+
+        g2d.setFont(WORD_FONT);
+        FontMetrics fm = g2d.getFontMetrics();
+        int padX = 8;
+        int padY = 4;
+
+        for (ClientFallingWord word : fallingWords) {
+            if (word == null || word.getText() == null) {
+                continue;
+            }
+
+            String text = word.getText();
+            int x = (int) word.getX();
+            int y = (int) ((word.getY() / SERVER_SCREEN_HEIGHT) * getHeight());
+
+            int boxWidth = fm.stringWidth(text) + padX * 2;
+            int boxHeight = fm.getHeight() + padY * 2;
+            int boxY = y - fm.getAscent() - padY;
+
+            g2d.setColor(Color.WHITE);
+            g2d.fillRoundRect(x, boxY, boxWidth, boxHeight, 10, 10);
+
+            g2d.setColor(WORD_BORDER_COLOR);
+            g2d.drawRoundRect(x, boxY, boxWidth, boxHeight, 10, 10);
+
+            g2d.setColor(WORD_TEXT_COLOR);
+            g2d.drawString(text, x + padX, y);
+        }
+    }
+
+    // 시야 차단 효과 활성화 시 보드 전체를 가리는 오버레이 렌더링
+    private void drawShadowOverlay(Graphics2D g2d) {
+        g2d.setColor(SHADOW_BG_COLOR);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
+        g2d.setFont(SHADOW_FONT);
+        g2d.setColor(SHADOW_TEXT_COLOR);
+        String msg = "시야 차단 효과 적용 중";
+        FontMetrics fm = g2d.getFontMetrics();
+        int textX = (getWidth() - fm.stringWidth(msg)) / 2;
+        int textY = getHeight() / 2;
+        g2d.drawString(msg, textX, textY);
     }
 
     public int getplayerId() {
@@ -258,18 +285,15 @@ public class PlayerGameBoardPanel extends JPanel {
         return nickname;
     }
 
-    // 기본 4.5초 동안 Shadow 발동
+    // 기본 지속 시간(4.5초) 동안 시야 차단 효과 발동
     public void triggerShadowEffect() {
         triggerShadowEffect(SHADOW_DURATION_MS);
     }
 
-    // 지정 시간(ms) 동안 Shadow 발동 (중복 피격 시 시간 초기화)
+    // 지정 시간(ms) 동안 시야 차단 효과 발동 (중복 피격 시 지속 시간 초기화)
     public void triggerShadowEffect(int durationMs) {
-        Runnable task = () -> {
-            if (shadowTimer != null && shadowTimer.isRunning()) {
-                shadowTimer.stop();
-            }
-
+        runOnEdt(() -> {
+            stopShadowTimer();
             isShadowEffectActive = true;
             repaint();
 
@@ -280,25 +304,25 @@ public class PlayerGameBoardPanel extends JPanel {
             });
             shadowTimer.setRepeats(false);
             shadowTimer.start();
-        };
+        });
+    }
 
-        if (SwingUtilities.isEventDispatchThread()) {
-            task.run();
-        } else {
-            SwingUtilities.invokeLater(task);
+    // 게임 종료·재시작 시 시야 차단 효과 즉시 해제
+    public void clearShadowEffect() {
+        runOnEdt(() -> {
+            stopShadowTimer();
+            isShadowEffectActive = false;
+            repaint();
+        });
+    }
+
+    private void stopShadowTimer() {
+        if (shadowTimer != null && shadowTimer.isRunning()) {
+            shadowTimer.stop();
         }
     }
 
-    // 게임 종료·재시작 시 즉시 해제
-    public void clearShadowEffect() {
-        Runnable task = () -> {
-            if (shadowTimer != null && shadowTimer.isRunning()) {
-                shadowTimer.stop();
-            }
-            isShadowEffectActive = false;
-            repaint();
-        };
-
+    private void runOnEdt(Runnable task) {
         if (SwingUtilities.isEventDispatchThread()) {
             task.run();
         } else {

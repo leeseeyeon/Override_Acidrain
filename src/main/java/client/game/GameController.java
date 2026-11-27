@@ -12,6 +12,7 @@ import javax.swing.Timer;
 
 import client.network.MessageListener;
 import client.network.ServerConnection;
+import client.result.GameOverView;
 import client.ui.*;
 import common.dto.GameResult;
 import common.dto.LastClaimedItem;
@@ -23,9 +24,11 @@ import common.message.SignalMessage;
 import common.message.game.*;
 import common.type.ItemType;
 
+// 게임 진행 중 사용자 입력, 서버 메시지 수신, 모델 상태 반영 및 화면 전환을 조율하는 컨트롤러
 public class GameController implements ActionListener, GameModelListener {
+
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS
-    private static final int DISCONNECT_REDIRECT_MS = 3000; // 3초
+    private static final int DISCONNECT_REDIRECT_MS = 3000;
 
     private GameClientModel gameModel;
     private GameView gameView;
@@ -34,22 +37,23 @@ public class GameController implements ActionListener, GameModelListener {
 
     private Timer gameLoopTimer;
     private Timer disconnectTimer;
+
     private int localPlayerId = -1;
     private boolean isGameRunning = false;
     private boolean isHandlingDisconnect = false;
 
-    // 동일한 itemId에 대한 Shadow 효과 중복 적용 방지용
+    // 동일한 아이템 효과(Shadow 등)의 중복 적용을 방지하기 위한 마지막 처리 ID
     private String lastProcessedItemId = null;
 
     private Runnable onReturnToLobby;
     private Runnable onReturnToLogin;
 
+    // 모델, 뷰, 서버 연결 객체를 주입받고 각 리스너를 바인딩
     public GameController(GameClientModel model, GameView view, ServerConnection connection) {
         this.gameModel = model;
         this.gameView = view;
         this.serverConnection = connection;
 
-        // 모델에 View와 Controller를 리스너로 등록
         if (this.gameModel != null) {
             if (this.gameView != null) {
                 this.gameModel.addListener(this.gameView);
@@ -57,12 +61,10 @@ public class GameController implements ActionListener, GameModelListener {
             this.gameModel.addListener(this);
         }
 
-        // View의 단어 입력(엔터) 이벤트를 Controller로 연결
         if (this.gameView != null) {
             this.gameView.setWordSubmitListener(this);
         }
 
-        // 서버 연결 끊김 감지 시 3초 오버레이 후 StartView로 복귀
         if (this.serverConnection != null) {
             this.serverConnection.addListener(new MessageListener() {
                 @Override
@@ -82,9 +84,11 @@ public class GameController implements ActionListener, GameModelListener {
 
     public void setLocalPlayerId(int playerId) {
         this.localPlayerId = playerId;
+
         if (this.gameModel != null) {
             this.gameModel.setLocalPlayerId(playerId);
         }
+
         if (this.gameView != null) {
             this.gameView.setLocalPlayerId(playerId);
         }
@@ -103,12 +107,14 @@ public class GameController implements ActionListener, GameModelListener {
         this.onReturnToLogin = onReturnToLogin;
     }
 
+    // 사용자가 입력한 단어를 검증한 뒤 서버로 제출
     public void onWordSubmitted(String word, double typingTime) {
         if (!isGameRunning || word == null) {
             return;
         }
 
         String trimmedWord = word.trim();
+
         if (trimmedWord.isEmpty()) {
             return;
         }
@@ -119,54 +125,60 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
+    // 서버에서 전달된 게임 상태를 모델에 반영하고, 획득된 아이템 효과를 처리
     public void onGameStateReceived(GameStateUpdateMessage update) {
         if (update == null || gameModel == null) {
             return;
         }
 
-        // 모델 상태 반영 -> 등록된 GameModelListener(GameView, GameController)로 자동 통지
         gameModel.applyServerUpdate(update);
 
         LastClaimedItem claimed = update.getLastClaimedItem();
+
         if (claimed != null) {
-            handleLastClaimedItem(String.valueOf(claimed.getItemId()), claimed.getType(), claimed.getClaimedBy());
+            handleLastClaimedItem(
+                String.valueOf(claimed.getItemId()),
+                claimed.getType(),
+                claimed.getClaimedBy()
+            );
         }
     }
 
-    /**
-     * 최근 획득된 아이템 정보를 처리합니다.
-     * 동일한 itemId에 대해서는 효과가 중복 적용되지 않습니다.
-     */
+    // 최근 획득된 아이템 효과를 적용 (동일한 itemId는 중복 처리하지 않음)
     public void handleLastClaimedItem(String itemId, ItemType itemType, int claimedBy) {
-        if (!isGameRunning || itemId == null || itemId.isBlank() || itemId.equals(lastProcessedItemId)) {
+        if (!isGameRunning || itemId == null || itemId.isBlank()
+                || itemId.equals(lastProcessedItemId)) {
             return;
         }
 
         lastProcessedItemId = itemId;
 
         if (itemType == ItemType.SHADOW) {
-            // 먹은 사람의 상대방 판을 가림 (두 화면 모두 같은 판이 가려짐)
             PlayerStateData p1 = gameModel.getPlayer1state();
             PlayerStateData p2 = gameModel.getPlayer2state();
+
             if (p1 == null || p2 == null) {
                 return;
             }
 
-            int victimId = (claimedBy == p1.getplayerId()) ? p2.getplayerId() : p1.getplayerId();
+            // 아이템을 획득한 플레이어의 상대방 화면을 가림
+            int victimId = (claimedBy == p1.getplayerId())
+                    ? p2.getplayerId()
+                    : p1.getplayerId();
+
             onShadowEffectReceived(victimId);
         }
     }
 
+    // 게임 종료 시 로컬 루프를 정지하고 결과 화면(GameOverView)을 표시
     public void onGameFinished(GameResult result) {
-        stopClientGameLoop();
-        lastProcessedItemId = null;
-
-        if (gameView != null) {
-            gameView.clearShadowEffects();
-        }
+        cleanupRoundState(false, false);
 
         if (gameOverView != null && gameModel != null && gameView != null) {
-            int myId = (gameModel.getLocalPlayerId() != -1) ? gameModel.getLocalPlayerId() : this.localPlayerId;
+            int myId = (gameModel.getLocalPlayerId() != -1)
+                    ? gameModel.getLocalPlayerId()
+                    : this.localPlayerId;
+
             int player1Id = gameView.getPlayer1Id();
             String p1Nick = gameView.getPlayer1Nickname();
             String p2Nick = gameView.getPlayer2Nickname();
@@ -176,32 +188,22 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
+    // 라운드 상태를 초기화하고 대기실 화면으로 복귀
     public void onClickRestart() {
-        stopClientGameLoop();
-        lastProcessedItemId = null;
+        cleanupRoundState(true, true);
 
-        if (gameOverView != null) {
-            gameOverView.dispose();
-        }
         if (gameView != null) {
-            gameView.clearInputField();
             gameView.clearConsoleLog();
-            gameView.clearShadowEffects();
         }
 
-        // 대기실 화면 전환
         if (onReturnToLobby != null) {
             onReturnToLobby.run();
         }
     }
 
+    // 라운드 상태를 초기화하고 서버 연결을 종료한 뒤 로그인 화면으로 복귀
     public void onClickMainMenu() {
-        stopClientGameLoop();
-        lastProcessedItemId = null;
-
-        if (gameOverView != null) {
-            gameOverView.dispose();
-        }
+        cleanupRoundState(true, true);
 
         if (serverConnection != null) {
             serverConnection.disconnect();
@@ -212,6 +214,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
+    // 클라이언트 화면 갱신용 렌더링 루프 시작
     public void startClientGameLoop() {
         stopClientGameLoop();
         isGameRunning = true;
@@ -221,23 +224,26 @@ public class GameController implements ActionListener, GameModelListener {
             gameView.clearInputField();
         }
 
-        // 단어 좌표 계산은 서버가 담당하므로 클라이언트는 화면 갱신(렌더링)만 수행
         gameLoopTimer = new Timer(LOOP_INTERVAL_MS, e -> {
             if (!isGameRunning || gameView == null) {
                 return;
             }
+
             gameView.repaint();
         });
+
         gameLoopTimer.start();
     }
 
     public void stopClientGameLoop() {
         isGameRunning = false;
+
         if (gameLoopTimer != null && gameLoopTimer.isRunning()) {
             gameLoopTimer.stop();
         }
     }
 
+    // 게임 중도 퇴장 시 루프를 정지하고 서버에 종료 시그널 전송
     public void onClickQuit() {
         stopClientGameLoop();
 
@@ -246,6 +252,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
+    // 단어 입력창 제출 및 결과창 버튼 액션 처리
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e == null) {
@@ -256,6 +263,7 @@ public class GameController implements ActionListener, GameModelListener {
             if (gameView != null) {
                 String enteredWord = gameView.getEnteredWord();
                 double typingTime = gameView.consumeTypingTime();
+
                 gameView.clearInputField();
                 onWordSubmitted(enteredWord, typingTime);
             }
@@ -263,6 +271,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
 
         String command = e.getActionCommand();
+
         if ("재시작".equals(command)) {
             onClickRestart();
         } else if ("메인 화면".equals(command)) {
@@ -270,64 +279,65 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
+    // 모델 상태 변경 시 패배(HP 0 이하) 여부를 감지해 로컬 루프를 선제 정지
     @Override
     public void onGameStateChanged(GameClientModel model) {
         if (model == null) {
             return;
         }
 
-        // 둘 중 한 명의 HP가 0 이하가 되면 로컬 루프를 먼저 정지
         PlayerStateData p1 = model.getPlayer1state();
         PlayerStateData p2 = model.getPlayer2state();
+
         boolean anyDefeated =
-                (p1 != null && p1.getCurrentHp() <= 0) ||
-                (p2 != null && p2.getCurrentHp() <= 0);
+                (p1 != null && p1.getCurrentHp() <= 0)
+                || (p2 != null && p2.getCurrentHp() <= 0);
 
         if (anyDefeated && isGameRunning) {
             stopClientGameLoop();
         }
     }
 
+    // 게임 중 서버 연결이 끊겼을 때 안내 오버레이를 3초간 표시한 뒤 로그인 화면으로 복귀
     public void onServerDisconnected() {
         SwingUtilities.invokeLater(() -> {
             if (isHandlingDisconnect) {
                 return;
             }
+
             isHandlingDisconnect = true;
 
-            stopClientGameLoop();
-            lastProcessedItemId = null;
+            cleanupRoundState(true, true);
 
-            if (gameOverView != null) {
-                gameOverView.dispose();
-            }
             if (gameView != null) {
-                gameView.clearShadowEffects();
                 gameView.showDisconnectedOverlay(true);
             }
 
-            if (disconnectTimer != null && disconnectTimer.isRunning()) {
-                disconnectTimer.stop();
+            if (disconnectTimer == null) {
+                disconnectTimer = new Timer(DISCONNECT_REDIRECT_MS, e -> {
+                    ((Timer) e.getSource()).stop();
+                    isHandlingDisconnect = false;
+
+                    if (gameView != null) {
+                        gameView.showDisconnectedOverlay(false);
+                    }
+
+                    if (onReturnToLogin != null) {
+                        onReturnToLogin.run();
+                    }
+                });
+
+                disconnectTimer.setRepeats(false);
             }
 
-            disconnectTimer = new Timer(DISCONNECT_REDIRECT_MS, e -> {
-                ((Timer) e.getSource()).stop();
-                isHandlingDisconnect = false;
-
-                if (gameView != null) {
-                    gameView.showDisconnectedOverlay(false);
-                }
-                if (onReturnToLogin != null) {
-                    onReturnToLogin.run();
-                }
-            });
-            disconnectTimer.setRepeats(false);
-            disconnectTimer.start();
+            disconnectTimer.restart();
         });
     }
 
+    // 서버로부터 수신한 JSON 메시지를 디코딩해 타입별로 분기 처리
     private void handleServerMessage(String json) {
-        Message message = decodeOrNull(json);
+        Message message = JsonUtil.decodeOrNull(json, "GameController");
+
         if (message == null) {
             return;
         }
@@ -346,34 +356,41 @@ public class GameController implements ActionListener, GameModelListener {
                     onOpponentLeft();
                 }
             }
-            default -> { /* 게임과 무관한 메시지는 무시 */ }
+            default -> {
+                // 게임과 무관한 메시지는 무시
+            }
         }
     }
 
+    // 상대방 이탈 시 알림을 띄우고 대기실로 복귀
     public void onOpponentLeft() {
-        stopClientGameLoop();
-        lastProcessedItemId = null;
+        cleanupRoundState(true, true);
 
-        if (gameOverView != null) {
-            gameOverView.dispose();
-        }
-        if (gameView != null) {
-            gameView.clearShadowEffects();
-        }
-
-        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 대기실로 돌아갑니다.");
+        JOptionPane.showMessageDialog(
+            gameView,
+            "상대방이 게임을 나갔습니다. 대기실로 돌아갑니다."
+        );
 
         if (onReturnToLobby != null) {
             onReturnToLobby.run();
         }
     }
 
-    private Message decodeOrNull(String json) {
-        try {
-            return JsonUtil.decode(json);
-        } catch (RuntimeException e) {
-            System.err.println("[GameController] 해석할 수 없는 메시지: " + json);
-            return null;
+    // 라운드 종료·중단 시 공통으로 수행하는 루프 정지 및 UI 상태 정리
+    private void cleanupRoundState(boolean disposeGameOver, boolean clearInput) {
+        stopClientGameLoop();
+        lastProcessedItemId = null;
+
+        if (disposeGameOver && gameOverView != null) {
+            gameOverView.dispose();
+        }
+
+        if (gameView != null) {
+            gameView.clearShadowEffects();
+
+            if (clearInput) {
+                gameView.clearInputField();
+            }
         }
     }
 
@@ -381,8 +398,10 @@ public class GameController implements ActionListener, GameModelListener {
         if (gameOverView == null) {
             return;
         }
+
         gameOverView.setRestartButtonListener(e -> onClickRestart());
         gameOverView.setMainMenuButtonListener(e -> onClickMainMenu());
+
         gameOverView.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -395,6 +414,7 @@ public class GameController implements ActionListener, GameModelListener {
         if (!isGameRunning || gameView == null) {
             return;
         }
+
         gameView.triggerShadowEffect(targetPlayerId);
     }
 }
