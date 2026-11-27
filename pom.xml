@@ -26,13 +26,5 @@
     <artifactId>gson</artifactId>
     <version>2.10.1</version>
   </dependency>
-
-    <!-- 테스트 도구 JUnit 5 (안 쓸 거면 이 dependency 덩어리째 삭제해도 됨) -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>5.10.2</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>

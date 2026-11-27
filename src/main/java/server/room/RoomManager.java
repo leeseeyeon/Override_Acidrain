@@ -7,6 +7,7 @@ import server.game.word.WordRepository;
 import server.game.word.DBWordRepository;
 import server.network.ClientHandler;
 
+// 서버의 모든 방을 관리: 입장할 방을 찾거나 새로 만들고, 빈 방은 삭제
 public class RoomManager {
     private static final RoomManager INSTANCE = new RoomManager();   // 클래스 로딩 때 딱 하나 생성
 
@@ -33,6 +34,7 @@ public class RoomManager {
         return room;
     }
 
+    // 방이 비었으면 목록에서 삭제
     public synchronized void removeRoom(GameRoom room) {
         if (room.isEmpty()) {
             rooms.remove(room);

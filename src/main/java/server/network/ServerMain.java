@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import common.config.NetworkConfig;
-import server.room.RoomManager;
 
+// 서버 시작점: 포트를 열고 접속한 클라이언트마다 ClientHandler 스레드를 만들어 줌
 public class ServerMain {
     public static final int PORT = NetworkConfig.LISTEN_PORT;
 

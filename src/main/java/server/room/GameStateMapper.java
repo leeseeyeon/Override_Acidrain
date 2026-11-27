@@ -14,7 +14,7 @@ import server.game.player.Player;
 import server.game.player.TypingStats;
 import server.game.word.FallingWord;
 
-// 게임 로직 상태 → GAME_STATE_UPDATE 메시지로 변환 (게임 로직은 메시지 형식을 몰라도 되게)
+// 게임 로직 상태 → GAMESTATEUPDATE 메시지로 변환 (게임 로직은 메시지 형식을 몰라도 되게)
 final class GameStateMapper {
 
     private GameStateMapper() {}
@@ -33,6 +33,7 @@ final class GameStateMapper {
                 toLastClaimedItem(game));
     }
 
+    // 서버 Player → 클라로 보낼 HP, CPM, 정확도 데이터
     private static PlayerStateData toPlayerState(Player p) {
         TypingStats stats = p.getTypingStats();
         return new PlayerStateData(p.getPlayerId(), p.getNickname(), p.getHP(),
@@ -58,6 +59,7 @@ final class GameStateMapper {
         return new LastClaimedItem(item.getItemId(), item.getType(), item.getClaimedBy());
     }
 
+    // 한 플레이어 화면에 떨어지는 단어 목록을 클라용으로 변환
     private static List<ClientFallingWord> toClientWords(ServerGameManager game, Player p) {
         List<ClientFallingWord> words = new ArrayList<>();
         for (FallingWord w : game.getWordManager(p.getPlayerId()).getActiveWords()) {

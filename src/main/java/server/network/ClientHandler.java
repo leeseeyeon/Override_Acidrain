@@ -16,6 +16,7 @@ import common.message.game.WordSubmitMessage;
 import server.room.GameRoom;
 import server.room.RoomManager;
 
+// 클라이언트 한 명과의 소켓 연결 담당: 메시지를 받아 방(GameRoom)에 전달하고, 서버 메시지를 클라로 보냄
 public class ClientHandler implements Runnable {
     private String nickname;
     private final Socket socket;
@@ -55,6 +56,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    // 소켓 닫기 (이미 닫혀 있으면 넘어감)
     private void closeSocket() {
         try {
             if (!socket.isClosed()) {
@@ -65,6 +67,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    // 받은 메시지를 type별로 나눠 방(GameRoom)에 전달 (입장 전에는 JOIN만 처리)
     private void handle(String request) {
         Message m = JsonUtil.decodeOrNull(request, "ClientHandler");
         if (m == null) {
@@ -91,6 +94,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    // 닉네임을 저장하고 RoomManager에서 방을 배정받음
     private void handleJoin(JoinMessage m) {
         if (room != null) return; // 이미 방에 있으면 무시
         nickname = m.getNickname();
@@ -106,6 +110,7 @@ public class ClientHandler implements Runnable {
         room = null;
     }
 
+    // 이 클라이언트에게 메시지 전송 (여러 스레드에서 동시에 보내도 안 섞이게 synchronized)
     public synchronized void send(Message message) {
         pw.println(JsonUtil.encode(message));
     }

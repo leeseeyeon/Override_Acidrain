@@ -1,5 +1,6 @@
 package common.config;
 
+// 서버 포트와 클라이언트 접속 주소 설정값
 public final class NetworkConfig {
     // 서버가 여는 포트
     public static final int LISTEN_PORT = 50023;

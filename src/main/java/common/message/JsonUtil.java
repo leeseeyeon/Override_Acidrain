@@ -1,10 +1,9 @@
 package common.message;
 
-
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
-
+// 메시지 ↔ JSON 문자열 변환 (type을 보고 맞는 메시지 클래스로 decode)
 public class JsonUtil {
     private static final Gson GSON = new Gson();   // 하나만 만들어서 공유 (thread-safe)
 

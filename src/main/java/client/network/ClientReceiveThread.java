@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+// 서버 메시지를 계속 받는 스레드 (받으면 ServerConnection에 넘기고, 서버 쪽에서 끊기면 알림)
 public class ClientReceiveThread implements Runnable {
 	private final Socket socket;
 	private final ServerConnection conn;
@@ -28,7 +29,6 @@ public class ClientReceiveThread implements Runnable {
 			
 		} catch (IOException e) {
 			error = e.getMessage();
-			System.out.println("서버로부터 메시지 수신 중 오류 : " + e.getMessage());
 		}
 		
 		if (!socket.isClosed()) { // 서버 쪽에서 끊김
