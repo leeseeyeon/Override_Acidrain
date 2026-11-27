@@ -1,7 +1,7 @@
 package server.game.item;
 
 import common.type.ItemType;
-import server.game.player.*;
+import server.game.player.Player;
 public class Item {
 	private int itemId; //아이템 고유번호
 	private String word; // 아이템을 획득하기 위해 입력해야하는 단어
