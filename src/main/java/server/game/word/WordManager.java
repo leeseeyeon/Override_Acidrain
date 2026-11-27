@@ -3,6 +3,7 @@ package server.game.word;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import common.config.GameConfig;
 
 public class WordManager {

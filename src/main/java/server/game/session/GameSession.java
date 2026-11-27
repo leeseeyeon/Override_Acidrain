@@ -1,6 +1,6 @@
 package server.game.session;
-import server.game.player.*;
 import common.type.Theme;
+import server.game.player.Player;
 
 
 public class GameSession {
