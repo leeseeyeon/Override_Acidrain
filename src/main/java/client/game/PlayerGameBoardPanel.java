@@ -23,16 +23,17 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import common.config.GameConfig;
 import common.dto.ClientFallingWord;
 import common.dto.PlayerStateData;
 
 // 개별 플레이어의 상태(닉네임, HP), 낙하 단어, 입력창 및 시야 차단 효과를 렌더링하는 보드 패널
 public class PlayerGameBoardPanel extends JPanel {
-    private static final int BOARD_WIDTH = 350;
+	private static final int BOARD_WIDTH = 350;
     private static final int BOARD_HEIGHT = 400;
-    private static final float SERVER_SCREEN_HEIGHT = 400.0f;
+    private static final float SERVER_SCREEN_HEIGHT = GameConfig.FIELD_HEIGHT;
     private static final int SHADOW_DURATION_MS = 4500;
-    private static final int MAX_HP = 100;
+    private static final int MAX_HP = GameConfig.MAX_HP;
 
     private static final Color PANEL_BG_COLOR = new Color(248, 250, 252);
     private static final Color PANEL_BORDER_COLOR = new Color(200, 208, 220);

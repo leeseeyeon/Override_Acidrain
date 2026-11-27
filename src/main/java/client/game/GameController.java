@@ -13,7 +13,6 @@ import javax.swing.Timer;
 import client.network.MessageListener;
 import client.network.ServerConnection;
 import client.result.GameOverView;
-import client.ui.*;
 import common.dto.GameResult;
 import common.dto.LastClaimedItem;
 import common.dto.PlayerStateData;
