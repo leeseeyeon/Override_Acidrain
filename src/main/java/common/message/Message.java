@@ -1,13 +1,13 @@
 package common.message;
 
 public abstract class Message {
-	protected String type;
+	protected MessageType type;
 	
-	protected Message(String type) {
+	protected Message(MessageType type) {
 		this.type = type;
 	}
 	
-	public String getType() {
+	public MessageType getType() {
 		return type;
 	}
 

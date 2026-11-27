@@ -5,7 +5,6 @@ import java.util.function.*;
 
 import javax.swing.*;
 
-import common.message.*;
 import common.type.Theme;
 
 public class OptionPanel extends JPanel {
