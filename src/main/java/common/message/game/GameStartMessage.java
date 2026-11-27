@@ -16,7 +16,7 @@ public class GameStartMessage extends Message {
         super(MessageType.GAME_START);
     }
 
-    // 서버가 보낼 때 쓰는 생성자 (각자에게 myPlayerId만 다르게)
+    // 서버가 보낼 때 쓰는 생성자 (player1 = 방장, player2 = 참가자)
     public GameStartMessage(int gameId, Theme theme, PlayerProfile player1, PlayerProfile player2) {
         this();
         this.gameId = gameId;

@@ -21,6 +21,7 @@ import server.game.player.Player;
 import server.game.word.WordRepository;
 import server.network.ClientHandler;
 
+// 방 하나(방장 + 참가자)의 대기실 상태와 게임 진행(카운트다운, tick, 종료)을 관리
 public class GameRoom {
 	private static final AtomicInteger NEXT_GAME_ID = new AtomicInteger(1); // 모든 방이 공유하는 게임 번호
 	private static final AtomicInteger NEXT_PLAYER_ID = new AtomicInteger(1); // 고유한 playerId
@@ -252,12 +253,14 @@ public class GameRoom {
     }
     
     
+    // 방에 있는 두 명 모두에게 메시지 전송
     private void broadcast(Message message) {
         if (host != null) host.send(message);
         if (guest != null) guest.send(message);
     }
 
     
+    // 방장, 참가자 둘 다 나갔는지 확인 (RoomManager가 방 삭제할 때 사용)
     public synchronized boolean isEmpty() {
         return host == null && guest == null;
     }
