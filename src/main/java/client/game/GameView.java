@@ -22,7 +22,7 @@ import java.awt.RenderingHints;
 public class GameView extends JPanel implements GameModelListener {
     private PlayerGameBoardPanel player1BoardPanel;
     private PlayerGameBoardPanel player2BoardPanel;
-    private AttackItemPromptPanel centerItemPromptPanel;
+    private ItemWordPanel centerItemPromptPanel;
     private GameConsoleLogPanel consoleLogPanel;
 
     private int localPlayerId = -1;
@@ -40,7 +40,7 @@ public class GameView extends JPanel implements GameModelListener {
         boardAreaPanel.setOpaque(false);
 
         player1BoardPanel = new PlayerGameBoardPanel();
-        centerItemPromptPanel = new AttackItemPromptPanel();
+        centerItemPromptPanel = new ItemWordPanel();
         player2BoardPanel = new PlayerGameBoardPanel();
 
         boardAreaPanel.add(player1BoardPanel, BorderLayout.WEST);
@@ -167,7 +167,7 @@ public class GameView extends JPanel implements GameModelListener {
         return player2BoardPanel;
     }
 
-    public AttackItemPromptPanel getCenterItemPromptPanel() {
+    public ItemWordPanel getCenterItemPromptPanel() {
         return centerItemPromptPanel;
     }
 

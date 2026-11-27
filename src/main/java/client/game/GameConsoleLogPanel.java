@@ -15,12 +15,12 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+// 게임 진행 중 발생하는 이벤트 로그를 하단에 표시하는 콘솔 패널
 public class GameConsoleLogPanel extends JPanel {
     private static final int DEFAULT_WIDTH = 700;
     private static final int DEFAULT_HEIGHT = 120;
 
     private JTextArea logTextArea;
-    private JScrollPane scrollPane;
 
     public GameConsoleLogPanel() {
         setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
@@ -35,7 +35,7 @@ public class GameConsoleLogPanel extends JPanel {
         titleLabel.setBorder(new EmptyBorder(4, 10, 4, 10));
         add(titleLabel, BorderLayout.NORTH);
 
-        // 로그 출력 영역
+        // 로그 출력 영역 (읽기 전용, 자동 줄바꿈)
         logTextArea = new JTextArea();
         logTextArea.setEditable(false);
         logTextArea.setLineWrap(true);
@@ -45,37 +45,20 @@ public class GameConsoleLogPanel extends JPanel {
         logTextArea.setForeground(new Color(226, 232, 240));
         logTextArea.setMargin(new Insets(6, 10, 6, 10));
 
-        // 스크롤 패널 부착
-        scrollPane = new JScrollPane(logTextArea);
+        JScrollPane scrollPane = new JScrollPane(logTextArea);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    public void appendLogMessage(String message) {
-        if (logTextArea == null || message == null || message.isBlank()) {
-            return;
-        }
-
-        Runnable appendTask = () -> {
-            logTextArea.append(message + "\n");
-            logTextArea.setCaretPosition(logTextArea.getDocument().getLength());
-        };
-
-        if (SwingUtilities.isEventDispatchThread()) {
-            appendTask.run();
-        } else {
-            SwingUtilities.invokeLater(appendTask);
-        }
-    }
-
+    // 서버에서 받은 전체 로그 목록으로 갱신하고 최신 로그(맨 아래)로 스크롤 이동
     public void updateLogs(List<String> logs) {
-        if (logTextArea == null) {
+        if (logTextArea == null || logs == null) {
             return;
         }
 
-        Runnable updateTask = () -> {
+        runOnEdt(() -> {
             StringBuilder sb = new StringBuilder();
             for (String log : logs) {
                 if (log != null && !log.isBlank()) {
@@ -84,34 +67,23 @@ public class GameConsoleLogPanel extends JPanel {
             }
             logTextArea.setText(sb.toString());
             logTextArea.setCaretPosition(logTextArea.getDocument().getLength());
-        };
-
-        if (SwingUtilities.isEventDispatchThread()) {
-            updateTask.run();
-        } else {
-            SwingUtilities.invokeLater(updateTask);
-        }
-    }
-    /**
-     * TODO [프로토콜 연동 - 단건 로그 방식일 경우]:
-     * 서버가 이벤트 발생 시마다 로그 메시지를 1건씩 보내는 프로토콜로 확정되면
-     * GameController 수신부에서 이 메서드를 호출하고, 필요 시 타임스탬프/말머리 포맷을 맞춥니다.
-     */
-    public void appendLog(String message) {
-        appendLogMessage(message);
+        });
     }
 
+    // 게임 재시작·초기화 시 콘솔 로그 영역 비우기
     public void clearConsoleLog() {
         if (logTextArea == null) {
             return;
         }
+        runOnEdt(() -> logTextArea.setText(""));
+    }
 
-        Runnable clearTask = () -> logTextArea.setText("");
-
+    // Swing UI 갱신을 EDT(Event Dispatch Thread)에서 안전하게 실행
+    private void runOnEdt(Runnable task) {
         if (SwingUtilities.isEventDispatchThread()) {
-            clearTask.run();
+            task.run();
         } else {
-            SwingUtilities.invokeLater(clearTask);
+            SwingUtilities.invokeLater(task);
         }
     }
 }

@@ -7,10 +7,10 @@ import javax.swing.*;
 
 import client.game.GameClientModel;
 import client.game.GameController;
-import client.game.GameOverView;
 import client.game.GameView;
 import client.lobby.*;
 import client.network.*;
+import client.result.GameOverView;
 import client.start.*;
 import common.message.*;
 import common.message.game.GameStartMessage;
