@@ -20,7 +20,9 @@ import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
 import common.message.SignalMessage;
-import common.message.game.*;
+import common.message.game.GameFinishedMessage;
+import common.message.game.GameStateUpdateMessage;
+import common.message.game.WordSubmitMessage;
 import common.type.ItemType;
 
 // 게임 진행 중 사용자 입력, 서버 메시지 수신, 모델 상태 반영 및 화면 전환을 조율하는 컨트롤러
