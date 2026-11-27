@@ -5,7 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import common.config.NetworkConfig;
-import server.room.RoomManager;
 
 public class ServerMain {
     public static final int PORT = NetworkConfig.LISTEN_PORT;
