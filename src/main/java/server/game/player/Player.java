@@ -1,11 +1,11 @@
 package server.game.player;
-
+import common.config.GameConfig;
 public class Player {
 	private int playerId; //playerid _ 대기실에서 할당됨
 	private String nickname; //설정된 nickname
 	private TypingStats typingStats; //타수
 	private int hp; 
-	private static final int MAX_HP = 100; //최대 100
+	private static final int MAX_HP = GameConfig.MAX_HP; //최대 100
 	
 	//player 생성자
 	public Player(int playerid, String nickname) {
