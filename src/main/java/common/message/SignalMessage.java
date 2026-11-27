@@ -1,7 +1,7 @@
 package common.message;
 
 public class SignalMessage extends Message {
-    private SignalMessage(String type) {
+    private SignalMessage(MessageType type) {
         super(type);
     }
 

@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import common.config.GameConfig;
 import common.dto.PlayerProfile;
 import common.message.ErrorMessage;
 import common.message.Message;
@@ -24,7 +25,7 @@ public class GameRoom {
 	private static final AtomicInteger NEXT_GAME_ID = new AtomicInteger(1); // 모든 방이 공유하는 게임 번호
 	private static final AtomicInteger NEXT_PLAYER_ID = new AtomicInteger(1); // 고유한 playerId
 	private static final long TICK_MS = 50; // 게임 상태 갱신 주기
-	private static final long COUNTDOWN_MS = 3000; // 클라 GameStartCountdown(3초)과 맞춤
+	private static final long COUNTDOWN_MS = GameConfig.START_COUNTDOWN_SECONDS * 1000L; // 클라 카운트다운과 같은 공통 설정값
 
 	// 모든 방이 같이 쓰는 게임 타이머 (방마다 쓰레드 만들지 않게)
 	private static final ScheduledExecutorService TICKER = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -93,8 +94,7 @@ public class GameRoom {
     
     //  테마 (방장만)
     public synchronized void setTheme(ClientHandler sender, Theme newTheme) {
-        if (sender != host) {
-            sender.send(new ErrorMessage(ErrorCode.NOT_HOST));
+        if (!requireHost(sender)) {
             return;
         }
         theme = newTheme; // 게임 시작 때 쓰려고 저장
@@ -104,28 +104,43 @@ public class GameRoom {
     
     // 시작 (방장만)
     public synchronized void start(ClientHandler sender) {
-        if (sender != host) {
-            sender.send(new ErrorMessage(ErrorCode.NOT_HOST));
+        if (!requireHost(sender)) {
             return;
         }
-        
-        if (guest == null || !guestReady || state == RoomState.PLAYING) {
+        if (!canStart()) {
             return; // 시작 조건이 아니면 조용히 무시
         }
         
         int gameId = NEXT_GAME_ID.getAndIncrement();
-        game = new ServerGameManager(gameId,
-                new Player(host.getPlayerId(), host.getNickname()),
-                new Player(guest.getPlayerId(), guest.getNickname()),
-                theme, wordRepository);
-
+        game = createGame(gameId);
         state = RoomState.PLAYING;
-        PlayerProfile p1 = new PlayerProfile(host.getPlayerId(), host.getNickname());
-        PlayerProfile p2 = new PlayerProfile(guest.getPlayerId(), guest.getNickname());
-        broadcast(new GameStartMessage(gameId, theme, p1, p2));
+        announceGameStart(gameId);
 
         // 클라 카운트다운(3초)이 끝나는 시점에 게임 시작
         tickTask = TICKER.schedule(this::beginGame, COUNTDOWN_MS, TimeUnit.MILLISECONDS);
+    }
+    
+    
+    // 시작 조건: 참가자가 있고, 준비했고, 게임 중이 아님
+    private boolean canStart() {
+        return guest != null && guestReady && state != RoomState.PLAYING;
+    }
+    
+    
+    // 방장·참가자 정보로 게임 로직 객체 생성
+    private ServerGameManager createGame(int gameId) {
+        return new ServerGameManager(gameId,
+                new Player(host.getPlayerId(), host.getNickname()),
+                new Player(guest.getPlayerId(), guest.getNickname()),
+                theme, wordRepository);
+    }
+    
+    
+    // 두 클라이언트에 GAME_START 전송 (player1 = 방장, player2 = 참가자)
+    private void announceGameStart(int gameId) {
+        PlayerProfile p1 = new PlayerProfile(host.getPlayerId(), host.getNickname());
+        PlayerProfile p2 = new PlayerProfile(guest.getPlayerId(), guest.getNickname());
+        broadcast(new GameStartMessage(gameId, theme, p1, p2));
     }
     
     
@@ -164,14 +179,12 @@ public class GameRoom {
         
         try {
             game.updateGame();
+            broadcast(GameStateMapper.toMessage(game)); // 두 클라이언트 같은 화면 (종료 직전 HP 0 상태까지 먼저 보냄)
 
             if (game.checkGameOver()) {
                 broadcast(new GameFinishedMessage(game.getGameResult()));
                 stopGame();
-                return;
             }
-
-            broadcast(GameStateMapper.toMessage(game)); // 두 클라이언트 같은 화면
         } catch (Exception e) {
             // 예외로 타이머가 조용히 죽지 않게 로그 남기고 게임 정리
             e.printStackTrace();
@@ -194,35 +207,51 @@ public class GameRoom {
     
     // 퇴장
     public synchronized void leave(ClientHandler leaver) {
-        boolean hostLeft;
-        
+        if (leaver != host && leaver != guest) {
+            return; // 이 방 사람이 아님
+        }
+
+        boolean hostLeft = removePlayer(leaver);
+        stopGame(); // 게임 중이었다면 타이머 끄고, 대기실 상태로
+        notifyRemaining(hostLeft);
+    }
+    
+    
+    // 자리에서 빼기. 방장이 나갔으면 남은 참가자가 방장 승계하고 true 반환
+    private boolean removePlayer(ClientHandler leaver) {
         if (leaver == guest) {
             guest = null;
-            hostLeft = false;
+            return false;
         }
-        
-        else if (leaver == host) {
-            host = guest; // 남은 참가자가 방장 승계
-            guest = null;
-            hostLeft = true;
+        host = guest;
+        guest = null;
+        return true;
+    }
+    
+    
+    // 남은 사람에게 상대 퇴장 알림 (방장 승계됐으면 역할도 알림)
+    private void notifyRemaining(boolean hostLeft) {
+        if (host == null) {
+            return; // 둘 다 나감
         }
-        
-        else {
-            return;
-        }
-
-        stopGame(); // 게임 중이었다면 타이머 끄고, 대기실 상태로
-
-        if (host != null) { // 둘 다 나간 게 아닐 때
-            host.send(SignalMessage.opponentLeft());
-            if (hostLeft) { // 승계됐다고 알려주기
-                host.send(new RoleMessage(Role.HOST));
-            }
+        host.send(SignalMessage.opponentLeft());
+        if (hostLeft) {
+            host.send(new RoleMessage(Role.HOST));
         }
     }
     
     
     // ===== 공통 =====
+    // 방장이면 true, 아니면 NOT_HOST 에러를 보내고 false
+    private boolean requireHost(ClientHandler sender) {
+        if (sender == host) {
+            return true;
+        }
+        sender.send(new ErrorMessage(ErrorCode.NOT_HOST));
+        return false;
+    }
+    
+    
     private void broadcast(Message message) {
         if (host != null) host.send(message);
         if (guest != null) guest.send(message);

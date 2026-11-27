@@ -3,6 +3,7 @@ package server.game.word;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import common.config.GameConfig;
 
 public class WordManager {
 
@@ -16,8 +17,8 @@ public class WordManager {
     private Random random = new Random();
 
     // 게임 화면 좌표
-    private static final float SCREEN_WIDTH = 300f;
-    public static final float SCREEN_HEIGHT = 400f;
+    private static final float SCREEN_WIDTH = GameConfig.FIELD_WIDTH;
+    public static final float SCREEN_HEIGHT = GameConfig.FIELD_HEIGHT;
     
     // 단어 잘림 방지를 위한 설정값
     private static final float CHAR_WIDTH = 15f;

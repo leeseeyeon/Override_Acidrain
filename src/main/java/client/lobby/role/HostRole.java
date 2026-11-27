@@ -3,7 +3,6 @@ package client.lobby.role;
 import client.lobby.LobbyModel;
 import client.network.*;
 import common.message.*;
-import common.message.lobby.*;
 
 /**
  * 방장 역할: 참가자가 준비하면 "게임 시작!" 버튼 활성화
