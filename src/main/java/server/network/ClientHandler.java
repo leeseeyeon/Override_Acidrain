@@ -60,7 +60,7 @@ public class ClientHandler implements Runnable {
             return;
         }
         
-        if (!m.getType().equals(MessageType.JOIN) && room == null) {
+        if (m.getType() != MessageType.JOIN && room == null) {
             log("입장 전 메시지 무시: " + m.getType());
             return;
         }
