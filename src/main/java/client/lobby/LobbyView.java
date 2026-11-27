@@ -2,7 +2,7 @@ package client.lobby;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;   // java.awt.List와 이름이 같아서 직접 지정
+import java.util.List; 
 import java.util.function.*;
 
 import javax.swing.*;
@@ -27,34 +27,56 @@ public class LobbyView extends JPanel implements LobbyModelListener {
     private int shownChatMessageCount = 0;
 
     public LobbyView() {
+        setUpPanel();
+        createTitle();
+        createHostCard();
+        createOptionPanel();
+        createGuestCard();
+        createChatPanel();
+        createActionButton();
+    }
+
+    private void setUpPanel() {
         setBackground(LOBBY_BACKGROUND_COLOR);
         setPreferredSize(new Dimension(1000, 760));
         setLayout(null);
+    }
 
+    private void createTitle() {
         titleLabel = new JLabel("대기실");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 26));
         titleLabel.setBounds(0, 15, 1000, 40);
         add(titleLabel);
+    }
 
+    private void createHostCard() {
         hostCardPanel = new PlayerCardPanel();
         hostCardPanel.setSlotTitle("방장");
         hostCardPanel.setBounds(40, 70, 220, 400);
         add(hostCardPanel);
+    }
 
+    private void createOptionPanel() {
         optionPanel = new OptionPanel();
         optionPanel.setBounds(280, 70, 440, 400);
         add(optionPanel);
+    }
 
+    private void createGuestCard() {
         guestCardPanel = new PlayerCardPanel();
         guestCardPanel.setSlotTitle("게스트");
         guestCardPanel.setBounds(740, 70, 220, 400);
         add(guestCardPanel);
+    }
 
+    private void createChatPanel() {
         chatPanel = new ChatPanel();
         chatPanel.setBounds(40, 488, 920, 170);
         add(chatPanel);
+    }
 
+    private void createActionButton() {
         lobbyActionButton = new JButton("준비");   
         lobbyActionButton.setForeground(Color.WHITE);
         lobbyActionButton.setBackground(ACTION_BUTTON_ENABLED_COLOR);

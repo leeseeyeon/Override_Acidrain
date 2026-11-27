@@ -21,10 +21,19 @@ public class ChatPanel extends JPanel {
     private JTextField chatInputField;
 
     public ChatPanel() {
+        setUpPanel();
+        createChatTitle();
+        createChatHistory();
+        createChatInputField();
+    }
+
+    private void setUpPanel() {
         setBackground(CHAT_BACKGROUND_COLOR);
         setPreferredSize(new Dimension(920, 170));
         setLayout(null);
+    }
 
+    private void createChatTitle() {
         chatTitleLabel = new JLabel(" 채팅");
         chatTitleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 12));
         chatTitleLabel.setOpaque(true); 
@@ -32,7 +41,9 @@ public class ChatPanel extends JPanel {
         chatTitleLabel.setBorder(BorderFactory.createLineBorder(HEADER_BORDER_COLOR, 1));
         chatTitleLabel.setBounds(0, 0, 920, 24);
         add(chatTitleLabel);
+    }
 
+    private void createChatHistory() {
         chatHistoryScrollPane = new JScrollPane();
         chatHistoryScrollPane.setBorder(BorderFactory.createEmptyBorder());
         chatHistoryScrollPane.getViewport().setBackground(CHAT_BACKGROUND_COLOR);
@@ -45,7 +56,9 @@ public class ChatPanel extends JPanel {
         chatHistoryArea.setForeground(CHAT_TEXT_COLOR); 
         chatHistoryArea.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
         chatHistoryScrollPane.setViewportView(chatHistoryArea);
+    }
 
+    private void createChatInputField() {
         chatInputField = new JTextField();
         chatInputField.setToolTipText("메시지를 입력하고 Enter를 누르세요");
         chatInputField.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
