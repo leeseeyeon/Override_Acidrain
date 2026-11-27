@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import common.message.game.AttackItemWord;
-import common.message.game.ClientFallingWord;
+import common.dto.AttackItemWord;
+import common.dto.ClientFallingWord;
+import common.dto.PlayerStateData;
 import common.message.game.GameStateUpdateMessage;
-import common.message.game.PlayerStateData;
 
-// 서버에서 전달받은 게임 상태(플레이어, 낙하 단어, 아이템, 로그)를 보관하고 리스너에 통지하는 클라이언트 모델
+//서버에서 전달받은 게임 상태(플레이어, 낙하 단어, 아이템, 로그)를 보관하고 리스너에 통지하는 클라이언트 모델
 public class GameClientModel {
 	private int localPlayerId = -1;
 	private PlayerStateData player1State; // ID가 작은 플레이어

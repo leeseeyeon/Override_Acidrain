@@ -1,7 +1,8 @@
 package server.game.item;
 
 import java.util.Random;
-import common.ItemType;
+
+import common.type.ItemType;
 public class ItemFactory {
 	private Random random = new Random();
 	private int nextItemId = 1;

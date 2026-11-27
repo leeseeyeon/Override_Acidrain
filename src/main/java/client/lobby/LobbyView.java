@@ -7,15 +7,16 @@ import java.util.function.*;
 
 import javax.swing.*;
 
+import client.lobby.panel.ChatPanel;
+import client.lobby.panel.OptionPanel;
+import client.lobby.panel.PlayerCardPanel;
 import common.message.*;
+import common.type.Theme;
 
-//MVC 중 View 담당. Observer!
 public class LobbyView extends JPanel implements LobbyModelListener {
-    //버튼 바활성화 상태(방장-"(Player2) 준비 중..."  게스트-"시작하길 기다리는 중...")
-	//해당 상태일 시 버튼 색상을 구분하기 위한 변수
-	private static final Color ACTION_BUTTON_ENABLED_COLOR = new Color(70, 99, 196);       // 누를 수 있을 때: 파랑
-    private static final Color ACTION_BUTTON_DISABLED_COLOR = new Color(212, 212, 212);  // 누를 수 없을 때: 연한 회색
-    private static final Color LOBBY_BACKGROUND_COLOR = new Color(226, 232, 240);        // 대기실 전체 배경: 연한 회청색
+	private static final Color ACTION_BUTTON_ENABLED_COLOR = new Color(70, 99, 196);       // 버튼 활성화
+    private static final Color ACTION_BUTTON_DISABLED_COLOR = new Color(212, 212, 212);  // 버튼 비활성화
+    private static final Color LOBBY_BACKGROUND_COLOR = new Color(226, 232, 240);   
 	
 	private JLabel titleLabel;
     private PlayerCardPanel hostCardPanel;
@@ -24,7 +25,6 @@ public class LobbyView extends JPanel implements LobbyModelListener {
     private ChatPanel chatPanel;
     private JButton lobbyActionButton;
 
-    /* 채팅창에 이미 표시한 메시지 수 (새로 생긴 것만 추가하기 위해) */
     private int shownChatMessageCount = 0;
 
     public LobbyView() {
@@ -56,11 +56,11 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         chatPanel.setBounds(40, 488, 920, 170);
         add(chatPanel);
 
-        lobbyActionButton = new JButton("준비");   // 디자인 확인 용 기본 글자. 실행 중에는 Controller가 updateActionButton()으로 바꿈
+        lobbyActionButton = new JButton("준비");   
         lobbyActionButton.setForeground(Color.WHITE);
         lobbyActionButton.setBackground(ACTION_BUTTON_ENABLED_COLOR);
-        lobbyActionButton.setContentAreaFilled(false);   // 기본 버튼 모양 대신 직접 칠한 배경 사용 (윈도우 테마에서도 진한 색이 보이도록)
-        lobbyActionButton.setOpaque(true);                // setContentAreaFilled 다음에 와야 함
+        lobbyActionButton.setContentAreaFilled(false);  
+        lobbyActionButton.setOpaque(true);    
         lobbyActionButton.setBorderPainted(false);
         lobbyActionButton.setFocusPainted(false);
         lobbyActionButton.setFont(new Font("맑은 고딕", Font.BOLD, 22));
@@ -68,8 +68,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         add(lobbyActionButton);
     }
 
-// ====== Model (--> View 옵저) 로부터 알림 =====
-
+//Model (--> View 옵저버) 로부터 알림
     @Override
     public void onLobbyChanged(LobbyModel model) {
         showHostCard(model);
@@ -80,7 +79,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
 
     private void showHostCard(LobbyModel model) {
         hostCardPanel.setNickname(model.getHostNickname());
-        hostCardPanel.showStatusText("");   // "방장"은 카드 제목 띠에 있어서 아래 칸은 비움
+        hostCardPanel.showStatusText("");  
     }
 
     private void showGuestCard(LobbyModel model) {
@@ -88,14 +87,14 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         if (model.getGuestNickname() == null) {
             guestCardPanel.showStatusText("");
         } else if (!model.isLocalPlayerHost()) {
-            guestCardPanel.showStatusText("");   // 참가자 화면: 준비 배지 없이 비움 ("게스트"는 카드 제목 띠에 있음)
+            guestCardPanel.showStatusText(""); 
         } else {
             guestCardPanel.showReadyBadge(model.isGuestReady());
         }
     }
 
     private void showNewChatMessages(List<ChatMessage> chatMessages) {
-        if (chatMessages.size() < shownChatMessageCount) {   // 방에 새로 들어와서 기록이 비워진 경우
+        if (chatMessages.size() < shownChatMessageCount) {   
             chatPanel.clearChatMessages();
             shownChatMessageCount = 0;
         }
@@ -105,8 +104,7 @@ public class LobbyView extends JPanel implements LobbyModelListener {
         shownChatMessageCount = chatMessages.size();
     }
 
-// ===== Controller (<--View) 가 쓰는 메소드 (유지) =====
-
+// Controller (<--View) 사용 메소드
     public void updateActionButton(String text, boolean isEnabled) {
         lobbyActionButton.setText(text);
         lobbyActionButton.setBackground(isEnabled ? ACTION_BUTTON_ENABLED_COLOR : ACTION_BUTTON_DISABLED_COLOR); 

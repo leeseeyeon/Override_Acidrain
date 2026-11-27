@@ -2,6 +2,10 @@ package common.message.game;
 
 import java.util.List;
 
+import common.dto.AttackItemWord;
+import common.dto.ClientFallingWord;
+import common.dto.LastClaimedItem;
+import common.dto.PlayerStateData;
 import common.message.Message;
 import common.message.MessageType;
 

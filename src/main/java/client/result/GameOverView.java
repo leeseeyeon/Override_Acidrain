@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import common.GameResult;
+import common.dto.GameResult;
 
 // 게임 종료 후 승패 결과와 플레이어별 타수·정확도 통계를 표시하는 결과 창
 public class GameOverView extends JFrame {

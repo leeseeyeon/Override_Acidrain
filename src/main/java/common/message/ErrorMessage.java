@@ -1,5 +1,7 @@
 package common.message;
 
+import common.type.ErrorCode;
+
 public class ErrorMessage extends Message {
     private ErrorCode errorCode;
 

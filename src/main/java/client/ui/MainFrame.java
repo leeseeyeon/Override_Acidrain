@@ -1,4 +1,3 @@
-//MainFrame
 package client.ui;
 
 import java.awt.*;
@@ -9,23 +8,15 @@ import client.game.GameClientModel;
 import client.game.GameController;
 import client.game.GameView;
 import client.lobby.*;
+import client.lobby.countdown.GameStartCountdown;
 import client.network.*;
 import client.result.GameOverView;
 import client.start.*;
 import common.message.*;
 import common.message.game.GameStartMessage;
+import common.type.Role;
 
-/**
- * prototype (전원 공유!)
- *
- * 클라이언트 메인 창으로 프로그램 시작점 입니다.
- * 창은 하나만(MainFrame) 두고, 여기서 시작 화면 → 대기실 → 게임 화면을 CardLayout으로 갈아 끼우는 방식
- *
- * 1. 객체 조립: ServerConnection 1개를 만들어 세 Controller(Start, Lobby, Game)가 같이 쓰게 함
- * 2. 리스너 등록: connect() 전에 StartController, LobbyController를 등록
- *    (GameController는 생성자에서 직접 등록함)
- * 3. 화면 전환: ScreenNavigator 구현 (화면을 넘길 때 필요한 데이터도 같이 전달)
- */
+
 public class MainFrame extends JFrame implements ScreenNavigator {
     private static final String START_SCREEN = "START";
     private static final String LOBBY_SCREEN = "LOBBY";
@@ -38,49 +29,45 @@ public class MainFrame extends JFrame implements ScreenNavigator {
     private final GameController gameController;
 
     public MainFrame() {
-        setTitle("대머리를 지켜라!"); //제목 표시줄
+        setTitle("SSS급 타자천재가 키보드를 잡았다"); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);   // 📌 1000 x 760 고정 배치. 수정 가능성O
+        setResizable(false); 
 
-        // 1. 서버 연결: 클라이언트 전체에서 1개만 만들어 같이 사용
+        //서버 연결: 클라이언트 전체에서 1개만 만들어 같이 사용
         ServerConnection serverConnection = new ServerConnection();
 
-        // 2. 대기실
+        // 대기실
         LobbyModel lobbyModel = new LobbyModel();
         LobbyView lobbyView = new LobbyView();
         lobbyController = new LobbyController(lobbyModel, lobbyView, serverConnection, this, new GameStartCountdown());
 
-        // 3. 시작 화면
+        //시작 화면
         StartView startView = new StartView();
         StartController startController = new StartController(startView, new NicknameValidator(), serverConnection, this);
 
-        // 4. 게임 화면 (GameView, GameClientModel, GameController)
-        //    GameController는 생성자에서 serverConnection에 자기 리스너를 직접 등록함
+        //게임 화면
         GameClientModel gameModel = new GameClientModel();
         GameView gameView = new GameView();
         gameController = new GameController(gameModel, gameView, serverConnection);
-        gameController.setGameOverView(new GameOverView());         // 결과 창 (별도 JFrame, 게임이 끝나면 GameController가 띄움)
-        gameController.setOnReturnToLogin(this::showStartScreen);   // 게임 중 내 연결 끊김, 게임 중 상대 퇴장(연결 끊고), 결과 화면 "메인 화면" → 시작 화면
-        // TODO(채영님): GameController에 setOnReturnToLobby(Runnable) 구현해주세요
-        //    결과 화면 "재시작" → 같은 방 대기실로 복귀 (방 상태 유지)
-        gameController.setOnReturnToLobby(this::returnToLobbyScreen);
+        gameController.setGameOverView(new GameOverView()); 
+        gameController.setOnReturnToLogin(this::showStartScreen); 
+        gameController.setOnReturnToLobby(this::returnToLobbyScreen); 
 
-        // 5. 서버 메시지 리스너 등록 (connect() 전에)
+        //서버 메시지 리스너 등록
         serverConnection.addListener(startController);
         serverConnection.addListener(lobbyController);
 
-        // 6. 화면 카드 등록
+        //화면 카드 등록
         screenContainer.add(startView, START_SCREEN);
         screenContainer.add(lobbyView, LOBBY_SCREEN);
         screenContainer.add(gameView, GAME_SCREEN);
         setContentPane(screenContainer);
 
         pack();
-        setLocationRelativeTo(null);   // 화면 가운데에 띄움
+        setLocationRelativeTo(null);
         showStartScreen();
     }
 
-    // ===== ScreenNavigator 구현 =====
 
     @Override
     public void showStartScreen() {
@@ -101,16 +88,12 @@ public class MainFrame extends JFrame implements ScreenNavigator {
 
     @Override
     public void showGameScreen(GameStartMessage gameStartMessage, int myPlayerId) {
-        gameController.setLocalPlayerId(myPlayerId);   // 내 고유 playerId (어느 보드가 나인지)
-        // 지금 보드의 id와 닉네임은 서버의 첫 GAME_STATE_UPDATE가 와야 채워짐
-        // gameStartMessage(player1, player2, theme)를 미리 넣는 메소드가 생기면 여기서 호출
-        // 예: gameController.prepareGame(gameStartMessage, myPlayerId);
+        gameController.setLocalPlayerId(myPlayerId);  
         gameController.startClientGameLoop();
         screenCardLayout.show(screenContainer, GAME_SCREEN);
     }
 
-    // ===== 프로그램 시작 =====
-
+    //프로그램 시작 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
     }

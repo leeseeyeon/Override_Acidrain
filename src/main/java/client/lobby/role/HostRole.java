@@ -1,11 +1,12 @@
-package client.lobby;
+package client.lobby.role;
 
+import client.lobby.LobbyModel;
 import client.network.*;
 import common.message.*;
 import common.message.lobby.*;
 
 /**
- * 방장 역할: 참가자가 준비하면 "시작!" 버튼 활성화
+ * 방장 역할: 참가자가 준비하면 "게임 시작!" 버튼 활성화
  *  START 전송, 옵션(테마) 편집 가능
  */
 public class HostRole implements LobbyRole {

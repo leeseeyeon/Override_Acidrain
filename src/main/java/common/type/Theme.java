@@ -1,4 +1,4 @@
-package common.message;
+package common.type;
 
 public enum Theme {
     BASIC(1, "기본"),

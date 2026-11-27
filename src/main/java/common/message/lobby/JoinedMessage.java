@@ -2,7 +2,7 @@ package common.message.lobby;
 
 import common.message.Message;
 import common.message.MessageType;
-import common.message.Role;
+import common.type.Role;
 
 public class JoinedMessage extends Message {
 	private int roomId;

@@ -10,8 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import common.message.game.AttackItemWord;
-import common.message.game.ClientFallingWord;
+import common.dto.AttackItemWord;
+import common.dto.ClientFallingWord;
 
 import java.awt.Font;
 import java.awt.FontMetrics;

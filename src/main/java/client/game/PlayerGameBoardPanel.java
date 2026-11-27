@@ -23,8 +23,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import common.message.game.ClientFallingWord;
-import common.message.game.PlayerStateData;
+import common.dto.ClientFallingWord;
+import common.dto.PlayerStateData;
 
 // 개별 플레이어의 상태(닉네임, HP), 낙하 단어, 입력창 및 시야 차단 효과를 렌더링하는 보드 패널
 public class PlayerGameBoardPanel extends JPanel {

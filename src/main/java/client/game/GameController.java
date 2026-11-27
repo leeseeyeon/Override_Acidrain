@@ -14,13 +14,15 @@ import client.network.MessageListener;
 import client.network.ServerConnection;
 import client.result.GameOverView;
 import client.ui.*;
-import common.GameResult;
-import common.ItemType;
+import common.dto.GameResult;
+import common.dto.LastClaimedItem;
+import common.dto.PlayerStateData;
 import common.message.JsonUtil;
 import common.message.Message;
 import common.message.MessageType;
 import common.message.SignalMessage;
 import common.message.game.*;
+import common.type.ItemType;
 
 // 게임 진행 중 사용자 입력, 서버 메시지 수신, 모델 상태 반영 및 화면 전환을 조율하는 컨트롤러
 public class GameController implements ActionListener, GameModelListener {
