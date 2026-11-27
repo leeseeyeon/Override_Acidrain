@@ -9,6 +9,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -16,8 +17,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import common.dto.AttackItemWord;
 import common.config.GameConfig;
+import common.dto.AttackItemWord;
 
 // 두 플레이어 보드 중앙에서 공통 아이템 단어와 이모지를 낙하 형태로 렌더링하는 패널
 public class ItemWordPanel extends JPanel {
