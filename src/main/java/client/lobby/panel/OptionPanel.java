@@ -8,19 +8,14 @@ import javax.swing.*;
 import common.message.*;
 import common.type.Theme;
 
-/*
-옵션선택 영역 (View 부품) - 단어 테마 선택
-테마마다 선택 카드(JToggleButton) 하나. 
-방장만 고를 수 있고, 참가자는 방장이 고른 테마를 보기만 함
- */
 public class OptionPanel extends JPanel {
-    private static final Color SELECTED_CARD_COLOR = new Color(30, 41, 59);         // 고른 테마: 진한 남색 바탕
-    private static final Color SELECTED_TEXT_COLOR = Color.WHITE;                   //            흰 글자
-    private static final Color UNSELECTED_CARD_COLOR = new Color(235, 240, 248);    // 안 고른 테마: 연한 파랑 바탕
-    private static final Color UNSELECTED_TEXT_COLOR = new Color(149, 149, 149);    //              회색 글자
-    private static final Color PANEL_BORDER_COLOR = new Color(200, 208, 220);       // 패널 테두리 (플레이어 카드와 같음)
-    private static final Color PANEL_BODY_COLOR = new Color(248, 250, 252);         // 패널 바탕
-    private static final Color HEADER_COLOR = new Color(235, 240, 248);             // 위쪽 제목 띠
+    private static final Color SELECTED_CARD_COLOR = new Color(30, 41, 59);    
+    private static final Color SELECTED_TEXT_COLOR = Color.WHITE;              
+    private static final Color UNSELECTED_CARD_COLOR = new Color(235, 240, 248);   
+    private static final Color UNSELECTED_TEXT_COLOR = new Color(149, 149, 149);   
+    private static final Color PANEL_BORDER_COLOR = new Color(200, 208, 220); 
+    private static final Color PANEL_BODY_COLOR = new Color(248, 250, 252);   
+    private static final Color HEADER_COLOR = new Color(235, 240, 248);   
     private static final String HOST_GUIDE_TEXT = "플레이할 단어 테마를 골라 주세요!";
     private static final String GUEST_GUIDE_TEXT = "방장이 단어 테마를 선택하고 있습니다";
 
@@ -30,9 +25,9 @@ public class OptionPanel extends JPanel {
     private JToggleButton csThemeCard;
     private JToggleButton englishThemeCard;
 
-    private Consumer<Theme> themeSelectListener; //선택된 카드
+    private Consumer<Theme> themeSelectListener; 
     private Theme shownTheme = Theme.BASIC;
-    private boolean isEditable = false; //참가자인 경우 테마 선택 불가.
+    private boolean isEditable = false;
 
     public OptionPanel() {
         setBackground(PANEL_BODY_COLOR);
@@ -43,9 +38,9 @@ public class OptionPanel extends JPanel {
         titleLabel = new JLabel("테마 선택");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        titleLabel.setOpaque(true);                 // 배경색을 칠해서 제목 띠로 사용
+        titleLabel.setOpaque(true);                 
         titleLabel.setBackground(HEADER_COLOR);
-        titleLabel.setBounds(1, 1, 438, 58);        // 테두리(1) 안쪽을 가로로 꽉 채움 (플레이어 카드 제목 띠와 같은 높이)
+        titleLabel.setBounds(1, 1, 438, 58);       
         add(titleLabel);
 
         guideLabel = new JLabel(GUEST_GUIDE_TEXT);
@@ -55,51 +50,48 @@ public class OptionPanel extends JPanel {
         guideLabel.setBounds(0, 70, 440, 22);
         add(guideLabel);
 
-        //ThemeCard1 : 기본 단어 테마.
+        //ThemeCard1 : 기본 단어 테마
         basicThemeCard = new JToggleButton(Theme.BASIC.getDisplayName());
         basicThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         basicThemeCard.setBounds(50, 108, 340, 80);
         add(basicThemeCard);
 
-        //ThemeCard2 : 컴퓨터 용어 테마.
+        //ThemeCard2 : 컴퓨터 용어 테마
         csThemeCard = new JToggleButton(Theme.CS.getDisplayName());
         csThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         csThemeCard.setBounds(50, 200, 340, 80);
         add(csThemeCard);
 
-        //ThemeCard3 : 영단어 테마.
+        //ThemeCard3 : 영단어 테마
         englishThemeCard = new JToggleButton(Theme.ENGLISH.getDisplayName());
         englishThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         englishThemeCard.setBounds(50, 292, 340, 80);
         add(englishThemeCard);
 
-        setUpThemeCards(); //setUpThemeCard 메소드 실행
+        setUpThemeCards(); 
     }
 
-    //모든 ThemeCard 버튼 객체를 배열에 저장해두자 (반복문에서 사용)
     private JToggleButton[] allThemeCards() {
         return new JToggleButton[] { basicThemeCard, csThemeCard, englishThemeCard };
     }
     
-    //생성자 마지막 줄에서 실행. 카드 초기설정
     private void setUpThemeCards() {
         for (JToggleButton themeCard : allThemeCards()) {
             themeCard.setFocusPainted(false);
-            themeCard.setContentAreaFilled(false);   // 기본 버튼 모양 대신 직접 칠한 배경을 사용
+            themeCard.setContentAreaFilled(false); 
             themeCard.setOpaque(true);
             themeCard.addActionListener(e -> onThemeCardClicked(toTheme(themeCard)));
         }
-        showSelectedTheme(Theme.BASIC); //처음에는 기본 테마 선택된 모습
-        setEditable(false); //처음에는 guest 처럼 잠그고, 방장이면 controller 가 풀어줌.
+        showSelectedTheme(Theme.BASIC); 
+        setEditable(false); 
     }
 
-    //카드 -> 테마. 선택된 카드가 어떤 테마인지 알려줌.
     private Theme toTheme(JToggleButton themeCard) {
         if (themeCard == csThemeCard) return Theme.CS;
         if (themeCard == englishThemeCard) return Theme.ENGLISH;
         return Theme.BASIC;
     }
-    //테마 -> 카드. 해당 테마가 어떤 카드에서 표시되는지.
+
     private JToggleButton toThemeCard(Theme theme) {
         return switch (theme) {
             case CS      -> csThemeCard;
@@ -109,20 +101,18 @@ public class OptionPanel extends JPanel {
     }
 
     private void onThemeCardClicked(Theme clickedTheme) {
-        showSelectedTheme(shownTheme);   // 클릭만으로는 바뀌지 않음. 서버가 THEME를 돌려주면 그때 바뀜
+        showSelectedTheme(shownTheme); 
         if (!isEditable || themeSelectListener == null) {
             return;
         }
         themeSelectListener.accept(clickedTheme);
     }
 
-// ===== LobbyView가 쓰는 메소드 (유지) =====
-    //선택된 테마를 알림.
+// LobbyView 사용 메소드
     public void setThemeSelectListener(Consumer<Theme> themeSelectListener) {
         this.themeSelectListener = themeSelectListener;
     }
 
-    //특정 ThemeCard가 선택될 경우 디자인 변경사항.
     public void showSelectedTheme(Theme selectedTheme) {
         shownTheme = selectedTheme;
         for (JToggleButton themeCard : allThemeCards()) {
@@ -134,7 +124,6 @@ public class OptionPanel extends JPanel {
         }
     }
 
-    //참가자는 setEnabled(false) 대신 클릭만 무시함
     public void setEditable(boolean isEditable) {
         this.isEditable = isEditable;
         guideLabel.setText(isEditable ? HOST_GUIDE_TEXT : GUEST_GUIDE_TEXT);
