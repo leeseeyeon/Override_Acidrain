@@ -93,7 +93,7 @@ public class StartController implements MessageListener {
         if (!isWaitingForJoinResult) {
             return;   // 대기실로 넘어간 뒤의 메시지는 LobbyController가 처리
         }
-        Message message = decodeOrNull(json);
+        Message message = JsonUtil.decodeOrNull(json, "StartController");   // 해석 못 하면 로그 남기고 null
         if (message == null) {
             return;
         }
@@ -127,14 +127,5 @@ public class StartController implements MessageListener {
 
     private void sendToServer(Message message) {
         serverConnection.send(message);   // ServerConnection이 JSON으로 바꿔서 보냄
-    }
-
-    private Message decodeOrNull(String json) {
-        try {
-            return JsonUtil.decode(json);
-        } catch (RuntimeException e) {   // JsonUtil에 등록되지 않은 type 등
-            System.err.println("[StartController] 해석할 수 없는 메시지: " + json);
-            return null;
-        }
     }
 }
