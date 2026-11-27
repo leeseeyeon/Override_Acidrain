@@ -29,28 +29,39 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
-        	socket.setTcpNoDelay(true);   // 작은 메시지 모아 보내지 않고 바로 전송 (게임 상태 지연 줄이기)
-            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
-
-            String request;
-            while ((request = br.readLine()) != null) {   // 메시지 올 때까지 대기
-                handle(request);
-            }
+        try (BufferedReader br = openStreams()) {
+            receiveLoop(br);
             log("연결 종료");
         } catch (IOException e) {
             log("연결 오류: " + e.getMessage());
-        } 
-        
-        finally {
-        	leaveRoom();
-        	
-            try {
-                if (!socket.isClosed()) socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        } finally {
+            leaveRoom();
+            closeSocket();
+        }
+    }
+
+    // 송수신 준비: 보내기용 pw 만들고, 받기용 reader 반환
+    private BufferedReader openStreams() throws IOException {
+        socket.setTcpNoDelay(true);   // 작은 메시지 모아 보내지 않고 바로 전송 (게임 상태 지연 줄이기)
+        pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+        return new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+    }
+
+    // 연결이 끊길 때까지 한 줄씩 받아서 처리
+    private void receiveLoop(BufferedReader br) throws IOException {
+        String request;
+        while ((request = br.readLine()) != null) {   // 메시지 올 때까지 대기
+            handle(request);
+        }
+    }
+
+    private void closeSocket() {
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
