@@ -4,8 +4,8 @@ package common.config;
 public final class GameConfig {
 
  // 게임 필드 크기
- public static final int FIELD_WIDTH = 300;
- public static final int FIELD_HEIGHT = 400;
+ public static final float FIELD_WIDTH = 300;
+ public static final float FIELD_HEIGHT = 400;
 
  // 플레이어 설정
  public static final int MAX_HP = 100;
