@@ -1,5 +1,6 @@
-package client.lobby;
+package client.lobby.role;
 
+import client.lobby.LobbyModel;
 import client.network.*;
 
 /*대기실에서의 역할별 동작 (Strategy 패턴)

@@ -7,6 +7,9 @@ import java.util.function.*;
 
 import javax.swing.*;
 
+import client.lobby.panel.ChatPanel;
+import client.lobby.panel.OptionPanel;
+import client.lobby.panel.PlayerCardPanel;
 import common.message.*;
 import common.type.Theme;
 

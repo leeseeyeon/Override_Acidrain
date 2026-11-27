@@ -1,10 +1,12 @@
-package client.lobby;
+package client.lobby.panel;
 
 import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
+
+import client.lobby.ChatMessage;
 
 //채팅 영역 (View 부품) - 입력칸에서 Enter를 누르면 전송
 

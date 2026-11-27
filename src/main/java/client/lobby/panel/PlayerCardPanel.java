@@ -1,4 +1,4 @@
-package client.lobby;
+package client.lobby.panel;
 
 import java.awt.*;
 

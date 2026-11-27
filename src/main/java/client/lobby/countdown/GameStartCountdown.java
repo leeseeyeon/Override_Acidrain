@@ -1,4 +1,4 @@
-package client.lobby;
+package client.lobby.countdown;
 
 import javax.swing.Timer;   // java.util.Timer와 이름이 같아서 직접 지정
 

@@ -1,5 +1,6 @@
-package client.lobby;
+package client.lobby.role;
 
+import client.lobby.LobbyModel;
 import client.network.*;
 import common.message.*;
 import common.message.lobby.*;

@@ -1,4 +1,4 @@
-package client.lobby;
+package client.lobby.countdown;
 
 /*
 GameStartCountdown이 진행 상황을 알리는 약속

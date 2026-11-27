@@ -10,6 +10,7 @@ import client.game.GameController;
 import client.game.GameOverView;
 import client.game.GameView;
 import client.lobby.*;
+import client.lobby.countdown.GameStartCountdown;
 import client.network.*;
 import client.start.*;
 import common.message.*;
