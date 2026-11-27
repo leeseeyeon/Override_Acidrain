@@ -2,7 +2,6 @@ package client.lobby;
 
 import java.util.*;
 
-import common.message.*;
 import common.type.Theme;
 
 public class LobbyModel {
