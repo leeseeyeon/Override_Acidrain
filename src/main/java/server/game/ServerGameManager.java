@@ -1,19 +1,19 @@
 package server.game;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import common.dto.GameResult;
 import common.type.Theme;
+import server.game.item.ItemManager;
+import server.game.player.Player;
+import server.game.rule.HpZeroWinCondition;
+import server.game.rule.WinCondition;
 import server.game.session.GameSession;
 import server.game.session.GameStatus;
-import server.game.player.Player;
+import server.game.word.FallingWord;
 import server.game.word.WordManager;
 import server.game.word.WordRepository;
-import server.game.word.FallingWord;
-import server.game.item.ItemManager;
-import server.game.rule.WinCondition;
-import server.game.rule.HpZeroWinCondition;
 
 public class ServerGameManager {
 

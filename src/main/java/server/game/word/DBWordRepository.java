@@ -1,17 +1,15 @@
 package server.game.word;
 
-import server.db.DatabaseConnector;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import common.type.Theme;
+import server.db.DatabaseConnector;
 
 public class DBWordRepository implements WordRepository {
 	
