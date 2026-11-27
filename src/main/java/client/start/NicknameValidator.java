@@ -20,6 +20,19 @@ public class NicknameValidator {
     /** 한글 완성형(가~힣), 자음(ㄱ~ㅎ), 모음(ㅏ~ㅣ), 영문 대소문자, 숫자만 허용*/
     private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+");
 
+    public boolean isValidNickname(String nickname) {
+        return findWarningMessage(nickname) == null;
+    }
+    
+    private boolean containsWhitespace(String nickname) {
+        for (char letter : nickname.toCharArray()) {
+            if (Character.isWhitespace(letter) || Character.isSpaceChar(letter)) { 
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /** 규칙위반 시 해당하는 경고문 리턴*/
     public String findWarningMessage(String nickname) {
         if (nickname == null || nickname.isEmpty()) {
@@ -37,16 +50,4 @@ public class NicknameValidator {
         return null;
     }
 
-    public boolean isValidNickname(String nickname) {
-        return findWarningMessage(nickname) == null;
-    }
-
-    private boolean containsWhitespace(String nickname) {
-        for (char letter : nickname.toCharArray()) {
-            if (Character.isWhitespace(letter) || Character.isSpaceChar(letter)) { 
-                return true;
-            }
-        }
-        return false;
-    }
 }
