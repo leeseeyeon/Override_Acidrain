@@ -1,10 +1,9 @@
-package client.lobby;
+package client.lobby.countdown;
 
-import javax.swing.Timer;   // java.util.Timer와 이름이 같아서 직접 지정
+import javax.swing.Timer; 
 
-/*
-게임 시작 전 3, 2, 1 카운트다운
-GAME_START를 받은 각 클라이언트가 스스로 셈 (서버 수정 없음)
+/**
+게임 화면으로 넘어가기 전 3, 2, 1 카운트다운
  */
 public class GameStartCountdown {
     private static final int COUNTDOWN_SECONDS = 3;

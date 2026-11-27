@@ -1,11 +1,13 @@
-package client.lobby;
+package client.lobby.role;
 
+import client.lobby.LobbyModel;
 import client.network.*;
 import common.message.*;
 import common.message.lobby.*;
 
 /**
- * 참가자 역할: "준비" 버튼 → READY 전송, 옵션(테마) 편집 불가
+ * 게스트 역할: "준비 됐나요?" 버튼 클릭 → READY 전송
+ * 옵션(테마) 선택 불가
  */
 public class GuestRole implements LobbyRole {
 
@@ -27,7 +29,7 @@ public class GuestRole implements LobbyRole {
         if (!isActionButtonEnabled(model)) {
             return;
         }
-        conn.send(new ReadyMessage(true));   // ServerConnection이 JSON으로 바꿔서 보냄
+        conn.send(new ReadyMessage(true)); 
     }
 
     @Override
