@@ -2,11 +2,13 @@ package client.lobby.countdown;
 
 import javax.swing.Timer; 
 
+import common.config.GameConfig;
+
 /**
 게임 화면으로 넘어가기 전 3, 2, 1 카운트다운
  */
 public class GameStartCountdown {
-    private static final int COUNTDOWN_SECONDS = 3;
+    private static final int COUNTDOWN_SECONDS = GameConfig.START_COUNTDOWN_SECONDS;  
     private static final int TICK_INTERVAL_MILLIS = 1000;
 
     private int remainingSeconds;
