@@ -10,7 +10,6 @@ import javax.swing.*;
 import client.lobby.panel.ChatPanel;
 import client.lobby.panel.OptionPanel;
 import client.lobby.panel.PlayerCardPanel;
-import common.message.*;
 import common.type.Theme;
 
 public class LobbyView extends JPanel implements LobbyModelListener {
