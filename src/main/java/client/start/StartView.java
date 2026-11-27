@@ -77,7 +77,7 @@ public class StartView extends JPanel {
         nicknameGuideLabel.setBounds(35, 22, 61, 32);
         nicknameFormPanel.add(nicknameGuideLabel);
 
-        createNicknameInputField();   // 둥근 입력칸은 길어서 따로 분리
+        createNicknameInputField();  
 
         errorMessageLabel = new JLabel(" ");
         errorMessageLabel.setForeground(ERROR_TEXT_COLOR);
