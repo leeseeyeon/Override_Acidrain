@@ -26,6 +26,7 @@ import common.type.ItemType;
 
 // 게임 진행 중 사용자 입력, 서버 메시지 수신, 모델 상태 반영 및 화면 전환을 조율하는 컨트롤러
 public class GameController implements ActionListener, GameModelListener {
+
     private static final int LOOP_INTERVAL_MS = 50; // 약 20 FPS
     private static final int DISCONNECT_REDIRECT_MS = 3000;
 
@@ -36,6 +37,7 @@ public class GameController implements ActionListener, GameModelListener {
 
     private Timer gameLoopTimer;
     private Timer disconnectTimer;
+
     private int localPlayerId = -1;
     private boolean isGameRunning = false;
     private boolean isHandlingDisconnect = false;
@@ -82,9 +84,11 @@ public class GameController implements ActionListener, GameModelListener {
 
     public void setLocalPlayerId(int playerId) {
         this.localPlayerId = playerId;
+
         if (this.gameModel != null) {
             this.gameModel.setLocalPlayerId(playerId);
         }
+
         if (this.gameView != null) {
             this.gameView.setLocalPlayerId(playerId);
         }
@@ -110,6 +114,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
 
         String trimmedWord = word.trim();
+
         if (trimmedWord.isEmpty()) {
             return;
         }
@@ -129,14 +134,20 @@ public class GameController implements ActionListener, GameModelListener {
         gameModel.applyServerUpdate(update);
 
         LastClaimedItem claimed = update.getLastClaimedItem();
+
         if (claimed != null) {
-            handleLastClaimedItem(String.valueOf(claimed.getItemId()), claimed.getType(), claimed.getClaimedBy());
+            handleLastClaimedItem(
+                String.valueOf(claimed.getItemId()),
+                claimed.getType(),
+                claimed.getClaimedBy()
+            );
         }
     }
 
     // 최근 획득된 아이템 효과를 적용 (동일한 itemId는 중복 처리하지 않음)
     public void handleLastClaimedItem(String itemId, ItemType itemType, int claimedBy) {
-        if (!isGameRunning || itemId == null || itemId.isBlank() || itemId.equals(lastProcessedItemId)) {
+        if (!isGameRunning || itemId == null || itemId.isBlank()
+                || itemId.equals(lastProcessedItemId)) {
             return;
         }
 
@@ -145,12 +156,16 @@ public class GameController implements ActionListener, GameModelListener {
         if (itemType == ItemType.SHADOW) {
             PlayerStateData p1 = gameModel.getPlayer1state();
             PlayerStateData p2 = gameModel.getPlayer2state();
+
             if (p1 == null || p2 == null) {
                 return;
             }
 
             // 아이템을 획득한 플레이어의 상대방 화면을 가림
-            int victimId = (claimedBy == p1.getplayerId()) ? p2.getplayerId() : p1.getplayerId();
+            int victimId = (claimedBy == p1.getplayerId())
+                    ? p2.getplayerId()
+                    : p1.getplayerId();
+
             onShadowEffectReceived(victimId);
         }
     }
@@ -160,7 +175,10 @@ public class GameController implements ActionListener, GameModelListener {
         cleanupRoundState(false, false);
 
         if (gameOverView != null && gameModel != null && gameView != null) {
-            int myId = (gameModel.getLocalPlayerId() != -1) ? gameModel.getLocalPlayerId() : this.localPlayerId;
+            int myId = (gameModel.getLocalPlayerId() != -1)
+                    ? gameModel.getLocalPlayerId()
+                    : this.localPlayerId;
+
             int player1Id = gameView.getPlayer1Id();
             String p1Nick = gameView.getPlayer1Nickname();
             String p2Nick = gameView.getPlayer2Nickname();
@@ -210,13 +228,16 @@ public class GameController implements ActionListener, GameModelListener {
             if (!isGameRunning || gameView == null) {
                 return;
             }
+
             gameView.repaint();
         });
+
         gameLoopTimer.start();
     }
 
     public void stopClientGameLoop() {
         isGameRunning = false;
+
         if (gameLoopTimer != null && gameLoopTimer.isRunning()) {
             gameLoopTimer.stop();
         }
@@ -242,6 +263,7 @@ public class GameController implements ActionListener, GameModelListener {
             if (gameView != null) {
                 String enteredWord = gameView.getEnteredWord();
                 double typingTime = gameView.consumeTypingTime();
+
                 gameView.clearInputField();
                 onWordSubmitted(enteredWord, typingTime);
             }
@@ -249,6 +271,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
 
         String command = e.getActionCommand();
+
         if ("재시작".equals(command)) {
             onClickRestart();
         } else if ("메인 화면".equals(command)) {
@@ -265,9 +288,10 @@ public class GameController implements ActionListener, GameModelListener {
 
         PlayerStateData p1 = model.getPlayer1state();
         PlayerStateData p2 = model.getPlayer2state();
+
         boolean anyDefeated =
-                (p1 != null && p1.getCurrentHp() <= 0) ||
-                (p2 != null && p2.getCurrentHp() <= 0);
+                (p1 != null && p1.getCurrentHp() <= 0)
+                || (p2 != null && p2.getCurrentHp() <= 0);
 
         if (anyDefeated && isGameRunning) {
             stopClientGameLoop();
@@ -280,6 +304,7 @@ public class GameController implements ActionListener, GameModelListener {
             if (isHandlingDisconnect) {
                 return;
             }
+
             isHandlingDisconnect = true;
 
             cleanupRoundState(true, true);
@@ -296,19 +321,23 @@ public class GameController implements ActionListener, GameModelListener {
                     if (gameView != null) {
                         gameView.showDisconnectedOverlay(false);
                     }
+
                     if (onReturnToLogin != null) {
                         onReturnToLogin.run();
                     }
                 });
+
                 disconnectTimer.setRepeats(false);
             }
+
             disconnectTimer.restart();
         });
     }
 
-    // 서버로부터 수신한 JSON 메시지를 타입별로 분기 처리
+    // 서버로부터 수신한 JSON 메시지를 디코딩해 타입별로 분기 처리
     private void handleServerMessage(String json) {
-        Message message = decodeOrNull(json);
+        Message message = JsonUtil.decodeOrNull(json, "GameController");
+
         if (message == null) {
             return;
         }
@@ -337,7 +366,10 @@ public class GameController implements ActionListener, GameModelListener {
     public void onOpponentLeft() {
         cleanupRoundState(true, true);
 
-        JOptionPane.showMessageDialog(gameView, "상대방이 게임을 나갔습니다. 대기실로 돌아갑니다.");
+        JOptionPane.showMessageDialog(
+            gameView,
+            "상대방이 게임을 나갔습니다. 대기실로 돌아갑니다."
+        );
 
         if (onReturnToLobby != null) {
             onReturnToLobby.run();
@@ -352,20 +384,13 @@ public class GameController implements ActionListener, GameModelListener {
         if (disposeGameOver && gameOverView != null) {
             gameOverView.dispose();
         }
+
         if (gameView != null) {
             gameView.clearShadowEffects();
+
             if (clearInput) {
                 gameView.clearInputField();
             }
-        }
-    }
-
-    private Message decodeOrNull(String json) {
-        try {
-            return JsonUtil.decode(json);
-        } catch (RuntimeException e) {
-            System.err.println("[GameController] 해석할 수 없는 메시지: " + json);
-            return null;
         }
     }
 
@@ -373,8 +398,10 @@ public class GameController implements ActionListener, GameModelListener {
         if (gameOverView == null) {
             return;
         }
+
         gameOverView.setRestartButtonListener(e -> onClickRestart());
         gameOverView.setMainMenuButtonListener(e -> onClickMainMenu());
+
         gameOverView.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -387,6 +414,7 @@ public class GameController implements ActionListener, GameModelListener {
         if (!isGameRunning || gameView == null) {
             return;
         }
+
         gameView.triggerShadowEffect(targetPlayerId);
     }
 }
