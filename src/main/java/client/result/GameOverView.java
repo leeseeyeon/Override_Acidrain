@@ -2,9 +2,11 @@ package client.result;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
@@ -48,6 +50,7 @@ public class GameOverView extends JFrame {
         setTitle("게임 결과");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
+        setAlwaysOnTop(true);
 
         JPanel contentPane = new JPanel(new BorderLayout(10, 10));
         contentPane.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -184,5 +187,16 @@ public class GameOverView extends JFrame {
         } else {
             SwingUtilities.invokeLater(task);
         }
+    }
+    
+ // 기준 컴포넌트(게임 화면/메인 창)의 중앙 위에 결과창 위치 배치 및 최상단 유지
+    public void centerOn(Component anchor) {
+        runOnEdt(() -> {
+            Window owner = (anchor != null) ? SwingUtilities.getWindowAncestor(anchor) : null;
+            Component target = (owner != null && owner.isShowing()) ? owner : anchor;
+            setLocationRelativeTo(target);
+            setAlwaysOnTop(true);
+            toFront();
+        });
     }
 }

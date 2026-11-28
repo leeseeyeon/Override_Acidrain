@@ -171,7 +171,7 @@ public class GameController implements ActionListener, GameModelListener {
         }
     }
 
-    // 게임 종료 시 로컬 루프를 정지하고 결과 화면(GameOverView)을 표시
+ // 게임 종료 시 로컬 루프를 정지하고 결과 화면(GameOverView)을 표시
     public void onGameFinished(GameResult result) {
         cleanupRoundState(false, false);
 
@@ -185,6 +185,7 @@ public class GameController implements ActionListener, GameModelListener {
             String p2Nick = gameView.getPlayer2Nickname();
 
             gameOverView.displayResult(result, myId, player1Id, p1Nick, p2Nick);
+            gameOverView.centerOn(gameView);
             gameOverView.setVisible(true);
         }
     }
