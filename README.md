@@ -120,7 +120,7 @@ java -jar AcidRain.jar
 ### 🎬 시연 영상
 
 <!-- 여기에 GitHub 편집 화면에서 mp4 파일을 끌어다 놓으면 영상 주소가 자동으로 들어갑니다 -->
-https://github.com/user-attachments/assets/99ac41fc-7fdf-465c-81ed-f3af1ee08e84
+https://github.com/user-attachments/assets/3665f911-76f1-4f58-bbe6-60c95553171d
 
 ---
 
