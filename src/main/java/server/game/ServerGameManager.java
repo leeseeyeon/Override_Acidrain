@@ -46,7 +46,7 @@ public class ServerGameManager {
     private static final double ITEM_PROBABILITY = 0.35;
     // 게임 진행 로그
     private final List<String> logMessage = new ArrayList<>();
-    private static final int MAX_LOG_COUNT = 30;
+    private static final int MAX_LOG_COUNT = 20;
 
     // 생성자
     public ServerGameManager(int gameId,
