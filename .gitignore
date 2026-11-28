@@ -17,3 +17,7 @@ Thumbs.db
 # 개인 설정·비밀번호
 db.properties
 *.log
+
+#exe파일 생성용
+/packaging/
+/dist/
