@@ -329,7 +329,7 @@ DB 접속 정보는 환경변수로 관리합니다.
     <th width="25%">이시연</th>
     <th width="25%">박채원</th>
     <th width="25%">편채영</th>
-    <th width="25%">윤영</th>
+    <th width="25%">문윤영</th>
   </tr>
   <tr align="center">
     <td><b>Team Leader<br/>Server / Network</b></td>
