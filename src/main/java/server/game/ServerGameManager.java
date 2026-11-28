@@ -46,6 +46,7 @@ public class ServerGameManager {
     private static final double ITEM_PROBABILITY = 0.35;
     // 게임 진행 로그
     private final List<String> logMessage = new ArrayList<>();
+    private static final int MAX_LOG_COUNT = 30;
 
     // 생성자
     public ServerGameManager(int gameId,
@@ -176,7 +177,9 @@ public class ServerGameManager {
                 itemManager.processItemInput(playerId, word);
 
         // ItemManager에서 생성한 로그 가져오기
-        logMessage.addAll(itemManager.drainLogMessages());
+        for (String log : itemManager.drainLogMessages()) {
+            addLog(log);
+        }
 
         // 2. 아이템 단어가 아니라면 일반 단어 확인
         if (!isCorrect) {
@@ -337,6 +340,11 @@ public class ServerGameManager {
     // 게임 로그 추가
     public synchronized void addLog(String message) {
         logMessage.add(message);
+        
+        //최대 로그 개수를 초과하면 가장 오래된 로그 제거
+        while (logMessage.size() > MAX_LOG_COUNT) {
+        	logMessage.remove(0);
+        }
     }
 
     // 게임 로그 반환
