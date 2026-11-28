@@ -28,30 +28,43 @@ public class StartView extends JPanel {
     private JLabel errorMessageLabel;
 
     public StartView() {
+        setUpPanel();
+        createDescription();
+        createLogo();
+        createNicknameForm();
+    }
+
+    private void setUpPanel() {
         setBackground(BACKGROUND_COLOR);
         setPreferredSize(new Dimension(1000, 760));
         setLayout(null);
+    }
 
+    private void createDescription() {
         descriptionPanel = new JPanel();
         descriptionPanel.setBackground(DESCRIPTION_COLOR);
         descriptionPanel.setBounds(0, 388, 1000, 84); 
         descriptionPanel.setLayout(null);
         add(descriptionPanel);
 
-        logoLabel = new JLabel("SSS급 타자천재가 키보드를 잡았다"); 
-        logoLabel.setBounds(0, 20, 1000, 350);
-        add(logoLabel);
-        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        logoLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 60));
-        showLogoImage();
-        
         descriptionLabel = new JLabel("<html><center>단어로 된 산성비가 내리는 세상, <br>" + "살아남기 위해서는 누구보다 빠르고 정확한 타자 실력이 필요합니다.<br>"
                 + "자신의 타자실력을 증명하고 승리를 차지하세요!</center></html>");
         descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         descriptionLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
         descriptionLabel.setBounds(0, 0, 1000, 84);  
         descriptionPanel.add(descriptionLabel);
+    }
 
+    private void createLogo() {
+        logoLabel = new JLabel("SSS급 타자천재가 키보드를 잡았다"); 
+        logoLabel.setBounds(0, 20, 1000, 350);
+        add(logoLabel);
+        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        logoLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 60));
+        showLogoImage();
+    }
+
+    private void createNicknameForm() {
         nicknameFormPanel = new JPanel();
         nicknameFormPanel.setBackground(FORM_COLOR);
         nicknameFormPanel.setBorder(BorderFactory.createLineBorder(FORM_BORDER_COLOR, 1));
@@ -64,6 +77,28 @@ public class StartView extends JPanel {
         nicknameGuideLabel.setBounds(35, 22, 61, 32);
         nicknameFormPanel.add(nicknameGuideLabel);
 
+        createNicknameInputField();  
+
+        errorMessageLabel = new JLabel(" ");
+        errorMessageLabel.setForeground(ERROR_TEXT_COLOR);
+        errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        errorMessageLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+        errorMessageLabel.setBounds(27, 64, 368, 37);
+        nicknameFormPanel.add(errorMessageLabel);
+
+        gameStartButton = new JButton("게임 입장");
+        gameStartButton.setForeground(Color.WHITE);
+        gameStartButton.setBackground(BUTTON_COLOR);
+        gameStartButton.setContentAreaFilled(false);  
+        gameStartButton.setOpaque(true);              
+        gameStartButton.setBorderPainted(false);
+        gameStartButton.setFocusPainted(false);
+        gameStartButton.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+        gameStartButton.setBounds(111, 124, 200, 66);
+        nicknameFormPanel.add(gameStartButton);
+    }
+
+    private void createNicknameInputField() {
         nicknameInputField = new JTextField() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -88,26 +123,6 @@ public class StartView extends JPanel {
         nicknameInputField.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
         nicknameInputField.setBounds(108, 23, 265, 32);
         nicknameFormPanel.add(nicknameInputField);
-
-        errorMessageLabel = new JLabel(" ");
-        errorMessageLabel.setForeground(ERROR_TEXT_COLOR);
-        errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        errorMessageLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
-        errorMessageLabel.setBounds(27, 64, 368, 37);
-        nicknameFormPanel.add(errorMessageLabel);
-        
-        gameStartButton = new JButton("게임 입장");
-        gameStartButton.setForeground(Color.WHITE);
-        gameStartButton.setBackground(BUTTON_COLOR);
-        gameStartButton.setContentAreaFilled(false);  
-        gameStartButton.setOpaque(true);              
-        gameStartButton.setBorderPainted(false);
-        gameStartButton.setFocusPainted(false);
-        gameStartButton.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-        gameStartButton.setBounds(111, 124, 200, 66);
-        nicknameFormPanel.add(gameStartButton);
-
-
     }
 
     private void showLogoImage() {
