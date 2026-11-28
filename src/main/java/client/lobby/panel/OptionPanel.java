@@ -1,6 +1,7 @@
 package client.lobby.panel;
 
 import java.awt.*;
+import java.util.*;
 import java.util.function.*;
 
 import javax.swing.*;
@@ -18,22 +19,40 @@ public class OptionPanel extends JPanel {
     private static final String HOST_GUIDE_TEXT = "플레이할 단어 테마를 골라 주세요!";
     private static final String GUEST_GUIDE_TEXT = "방장이 단어 테마를 선택하고 있습니다";
 
+    private static final int CARD_X = 49;
+    private static final int CARD_WIDTH = 340;
+    private static final int CARD_HEIGHT = 80;
+    private static final int CARD_GAP = 12;         
+    private static final int LIST_MARGIN = 8;        
+
     private JLabel titleLabel;
     private JLabel guideLabel;
-    private JToggleButton basicThemeCard;
-    private JToggleButton csThemeCard;
-    private JToggleButton englishThemeCard;
+    private JScrollPane themeScrollPane;  
+    private JPanel themeListPanel;       
+
+    private final Map<Theme, JToggleButton> themeCards = new EnumMap<>(Theme.class);
 
     private Consumer<Theme> themeSelectListener; 
     private Theme shownTheme = Theme.BASIC;
     private boolean isEditable = false;
 
     public OptionPanel() {
+        setUpPanel();
+        createHeader();
+        createThemeList();
+        createThemeCards();
+        showSelectedTheme(Theme.BASIC); 
+        setEditable(false); 
+    }
+
+    private void setUpPanel() {
         setBackground(PANEL_BODY_COLOR);
         setBorder(BorderFactory.createLineBorder(PANEL_BORDER_COLOR, 1));
         setPreferredSize(new Dimension(440, 400));
         setLayout(null);
+    }
 
+    private void createHeader() {
         titleLabel = new JLabel("테마 선택");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
@@ -48,59 +67,41 @@ public class OptionPanel extends JPanel {
         guideLabel.setForeground(new Color(100, 100, 100));
         guideLabel.setBounds(0, 70, 440, 22);
         add(guideLabel);
-
-        //ThemeCard1 : 기본 단어 테마
-        basicThemeCard = new JToggleButton(Theme.BASIC.getDisplayName());
-        basicThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-        basicThemeCard.setBounds(50, 108, 340, 80);
-        add(basicThemeCard);
-
-        //ThemeCard2 : 컴퓨터 용어 테마
-        csThemeCard = new JToggleButton(Theme.CS.getDisplayName());
-        csThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-        csThemeCard.setBounds(50, 200, 340, 80);
-        add(csThemeCard);
-
-        //ThemeCard3 : 영단어 테마
-        englishThemeCard = new JToggleButton(Theme.ENGLISH.getDisplayName());
-        englishThemeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-        englishThemeCard.setBounds(50, 292, 340, 80);
-        add(englishThemeCard);
-
-        setUpThemeCards(); 
     }
 
-    private JToggleButton[] allThemeCards() {
-        return new JToggleButton[] { basicThemeCard, csThemeCard, englishThemeCard };
+    private void createThemeList() {
+        themeListPanel = new JPanel();
+        themeListPanel.setBackground(PANEL_BODY_COLOR);
+        themeListPanel.setLayout(null);
+
+        themeScrollPane = new JScrollPane(themeListPanel);
+        themeScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        themeScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); 
+        themeScrollPane.getVerticalScrollBar().setUnitIncrement(16);   
+        themeScrollPane.setBounds(1, 100, 438, 298);  
+        add(themeScrollPane);
     }
-    
-    private void setUpThemeCards() {
-        for (JToggleButton themeCard : allThemeCards()) {
+
+    private void createThemeCards() {
+        int y = LIST_MARGIN;
+        for (Theme theme : Theme.values()) {
+            JToggleButton themeCard = new JToggleButton(theme.getDisplayName());
+            themeCard.setFont(new Font("맑은 고딕", Font.BOLD, 24));
+            themeCard.setBounds(CARD_X, y, CARD_WIDTH, CARD_HEIGHT);
             themeCard.setFocusPainted(false);
             themeCard.setContentAreaFilled(false); 
             themeCard.setOpaque(true);
-            themeCard.addActionListener(e -> onThemeCardClicked(toTheme(themeCard)));
+            themeCard.addActionListener(e -> onThemeCardClicked(theme));  
+            themeListPanel.add(themeCard);
+            themeCards.put(theme, themeCard);
+            y += CARD_HEIGHT + CARD_GAP;
         }
-        showSelectedTheme(Theme.BASIC); 
-        setEditable(false); 
-    }
-
-    private Theme toTheme(JToggleButton themeCard) {
-        if (themeCard == csThemeCard) return Theme.CS;
-        if (themeCard == englishThemeCard) return Theme.ENGLISH;
-        return Theme.BASIC;
-    }
-
-    private JToggleButton toThemeCard(Theme theme) {
-        return switch (theme) {
-            case CS      -> csThemeCard;
-            case ENGLISH -> englishThemeCard;
-            default      -> basicThemeCard;
-        };
+        int listHeight = y - CARD_GAP + LIST_MARGIN;   
+        themeListPanel.setPreferredSize(new Dimension(CARD_X * 2 + CARD_WIDTH, listHeight));
     }
 
     private void onThemeCardClicked(Theme clickedTheme) {
-        showSelectedTheme(shownTheme); 
+        showSelectedTheme(shownTheme);  
         if (!isEditable || themeSelectListener == null) {
             return;
         }
@@ -114,8 +115,9 @@ public class OptionPanel extends JPanel {
 
     public void showSelectedTheme(Theme selectedTheme) {
         shownTheme = selectedTheme;
-        for (JToggleButton themeCard : allThemeCards()) {
-            boolean isSelected = toTheme(themeCard) == selectedTheme;
+        for (Map.Entry<Theme, JToggleButton> entry : themeCards.entrySet()) {
+            boolean isSelected = entry.getKey() == selectedTheme;
+            JToggleButton themeCard = entry.getValue();
             themeCard.setSelected(isSelected);
             themeCard.setBackground(isSelected ? SELECTED_CARD_COLOR : UNSELECTED_CARD_COLOR);
             themeCard.setForeground(isSelected ? SELECTED_TEXT_COLOR : UNSELECTED_TEXT_COLOR);
@@ -127,7 +129,7 @@ public class OptionPanel extends JPanel {
         this.isEditable = isEditable;
         guideLabel.setText(isEditable ? HOST_GUIDE_TEXT : GUEST_GUIDE_TEXT);
         Cursor cursor = Cursor.getPredefinedCursor(isEditable ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR);
-        for (JToggleButton themeCard : allThemeCards()) {
+        for (JToggleButton themeCard : themeCards.values()) {
             themeCard.setCursor(cursor);
         }
     }

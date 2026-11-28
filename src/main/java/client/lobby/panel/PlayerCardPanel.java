@@ -22,10 +22,19 @@ public class PlayerCardPanel extends JPanel {
     private JLabel statusLabel;
 
     public PlayerCardPanel() {
+        setUpPanel();
+        createSlotTitle();
+        createNicknameLabel();
+        createStatusLabel();
+    }
+
+    private void setUpPanel() {
         setBackground(CARD_BODY_COLOR);
         setBorder(BorderFactory.createLineBorder(CARD_BORDER_COLOR, 1));
         setLayout(null);
+    }
 
+    private void createSlotTitle() {
         slotTitleLabel = new JLabel("Player");
         slotTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         slotTitleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
@@ -33,13 +42,17 @@ public class PlayerCardPanel extends JPanel {
         slotTitleLabel.setBackground(HEADER_COLOR);
         slotTitleLabel.setBounds(1, 1, 218, 58);      
         add(slotTitleLabel);
+    }
 
+    private void createNicknameLabel() {
         nicknameLabel = new JLabel(EMPTY_SLOT_TEXT);
         nicknameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         nicknameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 28));
         nicknameLabel.setBounds(1, 170, 218, 90);      
         add(nicknameLabel);
+    }
 
+    private void createStatusLabel() {
         statusLabel = new JLabel(" ");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
