@@ -120,7 +120,7 @@ java -jar AcidRain.jar
 ### 🎬 시연 영상
 
 <!-- 여기에 GitHub 편집 화면에서 mp4 파일을 끌어다 놓으면 영상 주소가 자동으로 들어갑니다 -->
-https://github.com/user-attachments/assets/영상주소
+https://github.com/user-attachments/assets/99ac41fc-7fdf-465c-81ed-f3af1ee08e84
 
 ---
 
@@ -327,8 +327,8 @@ DB 접속 정보는 환경변수로 관리합니다.
 <table>
   <tr align="center">
     <th width="25%">이시연</th>
-    <th width="25%">채원</th>
-    <th width="25%">채영</th>
+    <th width="25%">박채원</th>
+    <th width="25%">편채영</th>
     <th width="25%">윤영</th>
   </tr>
   <tr align="center">
