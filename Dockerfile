@@ -1,7 +1,7 @@
 # 1. Maven과 Java 21을 사용하여 프로젝트 빌드
 FROM maven:3.9-eclipse-temurin-21 AS build
 
-//Docker 내부 작업 폴더 설정
+#Docker 내부 작업 폴더 설정
 WORKDIR /app
 
 # 2. Maven 설정 파일 복사
