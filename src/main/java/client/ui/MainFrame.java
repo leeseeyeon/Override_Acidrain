@@ -12,7 +12,6 @@ import client.lobby.countdown.GameStartCountdown;
 import client.network.*;
 import client.result.GameOverView;
 import client.start.*;
-import common.message.*;
 import common.message.game.GameStartMessage;
 import common.type.Role;
 
@@ -29,45 +28,71 @@ public class MainFrame extends JFrame implements ScreenNavigator {
     private final GameController gameController;
 
     public MainFrame() {
-        setTitle("SSS급 타자천재가 키보드를 잡았다"); 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false); 
+        setUpFrame();
 
         //서버 연결: 클라이언트 전체에서 1개만 만들어 같이 사용
         ServerConnection serverConnection = new ServerConnection();
 
-        // 대기실
-        LobbyModel lobbyModel = new LobbyModel();
         LobbyView lobbyView = new LobbyView();
-        lobbyController = new LobbyController(lobbyModel, lobbyView, serverConnection, this, new GameStartCountdown());
+        lobbyController = createLobbyController(lobbyView, serverConnection);
 
-        //시작 화면
         StartView startView = new StartView();
-        StartController startController = new StartController(startView, new NicknameValidator(), serverConnection, this);
+        StartController startController = createStartController(startView, serverConnection);
 
-        //게임 화면
-        GameClientModel gameModel = new GameClientModel();
         GameView gameView = new GameView();
-        gameController = new GameController(gameModel, gameView, serverConnection);
-        gameController.setGameOverView(new GameOverView()); 
-        gameController.setOnReturnToLogin(this::showStartScreen); 
-        gameController.setOnReturnToLobby(this::returnToLobbyScreen); 
+        gameController = createGameController(gameView, serverConnection);
 
-        //서버 메시지 리스너 등록
+        registerListeners(serverConnection, startController);
+        registerScreens(startView, lobbyView, gameView);
+        showFrame();
+    }
+
+    private void setUpFrame() {
+        setTitle("SSS급 타자천재가 키보드를 잡았다"); 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false); 
+    }
+
+    /** 대기실 */
+    private LobbyController createLobbyController(LobbyView lobbyView, ServerConnection serverConnection) {
+        LobbyModel lobbyModel = new LobbyModel();
+        return new LobbyController(lobbyModel, lobbyView, serverConnection, this, new GameStartCountdown());
+    }
+
+    /** 시작 화면 */
+    private StartController createStartController(StartView startView, ServerConnection serverConnection) {
+        return new StartController(startView, new NicknameValidator(), serverConnection, this);
+    }
+
+    /** 게임 화면 */
+    private GameController createGameController(GameView gameView, ServerConnection serverConnection) {
+        GameClientModel gameModel = new GameClientModel();
+        GameController controller = new GameController(gameModel, gameView, serverConnection);
+        controller.setGameOverView(new GameOverView()); 
+        controller.setOnReturnToLogin(this::showStartScreen); 
+        controller.setOnReturnToLobby(this::returnToLobbyScreen); 
+        return controller;
+    }
+
+    /** 서버 메시지 리스너 등록 */
+    private void registerListeners(ServerConnection serverConnection, StartController startController) {
         serverConnection.addListener(startController);
         serverConnection.addListener(lobbyController);
+    }
 
-        //화면 카드 등록
+    /** 화면 카드 등록 */
+    private void registerScreens(StartView startView, LobbyView lobbyView, GameView gameView) {
         screenContainer.add(startView, START_SCREEN);
         screenContainer.add(lobbyView, LOBBY_SCREEN);
         screenContainer.add(gameView, GAME_SCREEN);
         setContentPane(screenContainer);
+    }
 
+    private void showFrame() {
         pack();
         setLocationRelativeTo(null);
         showStartScreen();
     }
-
 
     @Override
     public void showStartScreen() {

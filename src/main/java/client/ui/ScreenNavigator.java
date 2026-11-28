@@ -1,6 +1,5 @@
 package client.ui;
 
-import common.message.*;
 import common.message.game.GameStartMessage;
 import common.type.Role;
 
